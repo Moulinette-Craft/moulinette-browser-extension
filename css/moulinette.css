@@ -1,0 +1,18 @@
+#moulinette {
+  background: green;
+  height: 100%;
+  width: 0px;
+  position: fixed;
+  top: 0px;
+  right: 0px;
+  zIndex: 9000000000000000000;
+  resize: horizontal;
+  overflow: auto;
+}
+
+.mtte .asset {
+  background-color: red;
+  width: 100px;
+  height: 100px;
+  cursor: grab;
+}

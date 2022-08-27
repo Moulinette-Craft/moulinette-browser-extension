@@ -1,0 +1,57 @@
+{
+
+  "manifest_version": 3,
+  "name": "Moulinette",
+  "version": "1.0",
+  "description": "Adds a red border to all webpages matching mozilla.org.",
+
+  "icons": {
+    "48": "icons/moulinette-48.png",
+    "96": "icons/moulinette-96.png"
+  },
+
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "webRequest"
+  ],
+
+  "host_permissions": [
+    "https://www.gravatar.com/*"
+  ],
+
+  "background": {
+    "service_worker": "moulinette.js"
+  },
+
+  "action": {
+    "default_icon": {
+      "16": "icons/moulinette-16.png",
+      "32": "icons/moulinette-32.png"
+    }
+  },
+
+  "commands": {
+    "toggle": {
+      "suggested_key": {
+        "default": "Ctrl+M"
+      },
+      "description": "Show/hide Moulinette UI"
+    }
+  },
+
+  "content_scripts": [{
+    "run_at" :"document_end",
+    "matches": [
+      "https://*/*",
+      "http://*/*"
+    ],
+    "js": [ "js/moulinette-iframe.js" ],
+    "css": [ "css/moulinette.css" ]
+  }],
+
+  "web_accessible_resources": [{
+      "matches": ["<all_urls>"],
+      "resources": ["html/moulinette.html"]
+  }]
+}
