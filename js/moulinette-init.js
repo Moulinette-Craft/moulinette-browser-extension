@@ -2,13 +2,18 @@
 
 const moulinette = document.getElementById("moulinette")
 if(!moulinette) {
-  var iframe = document.createElement('iframe');
-  iframe.id = "moulinette"
-  iframe.style.zIndex = "9000000000000000000";
-  iframe.frameBorder = "none";
-  iframe.src = chrome.runtime.getURL("html/moulinette.html")
-
-  document.body.appendChild(iframe);
+  $.ajax({
+      url: chrome.runtime.getURL("html/moulinette.html"),
+      cache: false
+  }).done(function(data) {
+    const panel = document.createElement('div');
+    panel.id = "moulinette-panel"
+    document.body.appendChild(panel);
+    $(panel).html(data);
+    const dropzone = document.createElement('div');
+    dropzone.id = "moulinette-drop"
+    document.body.appendChild(dropzone);
+  });
 }
 
 

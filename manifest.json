@@ -46,7 +46,11 @@
       "https://*/*",
       "http://*/*"
     ],
-    "js": [ "js/moulinette-iframe.js" ],
+    "js": [
+      "js/jquery-3.6.1.min.js",
+      "js/moulinette-init.js",
+      "js/moulinette.js"
+    ],
     "css": [ "css/moulinette.css" ]
   }],
 

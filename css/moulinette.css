@@ -1,16 +1,26 @@
-#moulinette {
-  background: green;
-  height: 100%;
-  width: 0px;
-  position: fixed;
+#moulinette-drop {
+  position: absolute;
   top: 0px;
-  right: 0px;
-  zIndex: 9000000000000000000;
-  resize: horizontal;
-  overflow: auto;
+  left: 0px;
+  bottom: 0px;
+  right: 400px;
+  z-index: 8000000000000000000;
+  background: yellow;
+  opacity: 30%;
+  display: none;
 }
 
-.mtte .asset {
+#moulinette-panel {
+  background: green;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  width: 400px;
+  z-index: 9000000000000000000;
+}
+
+#moulinette-panel .asset {
   background-color: red;
   width: 100px;
   height: 100px;
