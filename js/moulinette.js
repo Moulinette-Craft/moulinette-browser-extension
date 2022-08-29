@@ -1,36 +1,43 @@
+
 $( document ).ready(async function() {
 
-  console.log("Downloading...")
-  const moulinette = {}
-  let res = await fetch("https://www.gravatar.com/avatar/9f5572c100ce5f2f90ee842c65c831db?s=64&d=identicon&r=PG").catch(function(e) {
-    console.log(`Moulinette | Not able to fetch file`, e)
-  });
-  if(res) {
-    const blob = await res.blob()
-    const file = new File([blob], "temp.png", { type: blob.type, lastModified: new Date() })
-    console.log("downloaded")
-    moulinette.curFile = file
-  }
+  /**
+   * Initialize search engine
+   */
+  const client = new MoulinetteSearch("huymc4d3he9r8t25nl0ldnimza");
+  await client.init()
 
-  $(".asset").on('dragstart', function(e) {
-    $("#moulinette-drop").show()
-    //console.log(e.originalEvent)
-    //e.originalEvent.dataTransfer.setData()
+  /**
+   * Bring focus to search field
+   */
+  $("#mtteSearch").focus()
 
-    //e.originalEvent.dataTransfer = new DataTransfer();
-    /*
-    e.originalEvent.dataTransfer.items.add(moulinette.curFile); // File object representing image being dropped
+  /**
+   * Execute search
+   */
+  $("#mtteSearch").keyup(async function(e) {
+    if(e.keyCode == 13) {
+      const terms = $("#mtteSearch").val()
+      if(terms && terms.length >= 3) {
+        const results = await client.search(terms)
+        let resultsHTML = ""
+        results.forEach(r => {
+          resultsHTML += `<div class="tileres draggable" title="${r.name}" data-id="${r.id}"><img width="70" height="70" src="${r.url}"/></div>`
+        })
+        $("#mtteAssets").html(resultsHTML)
 
-    const dataTransfer = new DataTransfer();
-    dataTransfer.items.add(moulinette.curFile); // File object representing image being dropped
-    dataTransfer.setData("text/plain", JSON.stringify({type: "moulinette"}));
-    console.log(dataTransfer)
-    e.originalEvent.dataTransfer = dataTransfer
-    */
-    e.originalEvent.dataTransfer.setData("Moulinette", JSON.stringify({}));
-
-    //e.dataTransfer = e.originalEvent.dataTransfer
-    //evt.dataTransfer.data("DownloadURL",fileDetails); // so this produces error
+        // add listeners
+        $(".tileres").on('dragstart', function(ev) {
+          $("#moulinette-drop").show()
+          const asset = $(ev.currentTarget)
+          ev.originalEvent.dataTransfer.setData("Moulinette", JSON.stringify({
+            id: asset.data("id"),
+            url: asset.find("img").attr("src"),
+            name: asset.attr("title")
+          }));
+        });
+      }
+    }
   });
 
 
@@ -68,22 +75,31 @@ $( document ).ready(async function() {
     e.stopPropagation();
   })
 
-  $("#moulinette-drop").on("drop", function(e) {
+  $("#moulinette-drop").on("drop", async function(e) {
     $("#moulinette-drop").hide()
-    const data = e.originalEvent.dataTransfer.getData("Moulinette");
+    let data = e.originalEvent.dataTransfer.getData("Moulinette");
     if(data) {
-      const dataTransfer = new DataTransfer();
-      dataTransfer.items.add(moulinette.curFile);
-      const event = new DragEvent('drop', {
-        dataTransfer: dataTransfer,
-        clientX: e.originalEvent.clientX,
-        clientY: e.originalEvent.clientY
+      data = JSON.parse(data)
+      let res = await fetch(data.url).catch(function(e) {
+        console.log(`Moulinette | Not able to download image`, e)
       });
-      // dispatch events
-      let cur = document.elementFromPoint(e.originalEvent.screenX, e.originalEvent.screenY)
-      while(cur) {
-        const res = cur.dispatchEvent(event);
-        cur = cur.parentElement
+      if(res) {
+        const blob = await res.blob()
+        const file = new File([blob], data.name, { type: blob.type, lastModified: new Date() })
+
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        const event = new DragEvent('drop', {
+          dataTransfer: dataTransfer,
+          clientX: e.originalEvent.clientX,
+          clientY: e.originalEvent.clientY
+        });
+        // dispatch events
+        let cur = document.elementFromPoint(e.originalEvent.screenX, e.originalEvent.screenY)
+        while(cur) {
+          const res = cur.dispatchEvent(event);
+          cur = cur.parentElement
+        }
       }
     }
   });
@@ -91,5 +107,4 @@ $( document ).ready(async function() {
   $("#moulinette-drop").click(function(e) {
     $("#moulinette-drop").hide()
   })
-
 });

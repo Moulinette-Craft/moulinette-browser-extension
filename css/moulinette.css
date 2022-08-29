@@ -1,5 +1,5 @@
 #moulinette-drop {
-  position: absolute;
+  position: fixed;
   top: 0px;
   left: 0px;
   bottom: 0px;
@@ -11,13 +11,14 @@
 }
 
 #moulinette-panel {
-  background: green;
-  position: absolute;
+  position: fixed;
   top: 0px;
   right: 0px;
   bottom: 0px;
   width: 400px;
   z-index: 9000000000000000000;
+  border-left: 2px solid #ddd;
+  background-color: #DFDDD1;
 }
 
 #moulinette-panel .asset {
@@ -25,4 +26,46 @@
   width: 100px;
   height: 100px;
   cursor: grab;
+}
+
+#moulinette-panel h1 {
+  font-size: 28px;
+  font-family: Sans-serif;
+  margin-left: 70px;
+  margin-top: 18px;
+}
+
+#moulinette-panel .logo {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  width: 48px;
+}
+
+#moulinette-panel .content {
+  margin-top: 25px;
+  height: 100%;
+}
+
+#moulinette-panel input.search {
+  margin: 0px 10px;
+  width: 380px;
+}
+
+#mtteAssets {
+  position: fixed;
+  right: 5px;
+  top: 120px;
+  bottom: 20px;
+  width: 390px;
+
+  overflow-x: "hidden";
+  overflow-y: auto;
+}
+
+#mtteAssets .tileres {
+  display: inline-flex;
+  cursor: grab;
+  position: relative;
+  margin: 2px;
 }

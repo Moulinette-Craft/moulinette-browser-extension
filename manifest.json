@@ -13,7 +13,8 @@
   "permissions": [
     "activeTab",
     "scripting",
-    "webRequest"
+    "webRequest",
+    "storage"
   ],
 
   "host_permissions": [
@@ -48,6 +49,9 @@
     ],
     "js": [
       "js/jquery-3.6.1.min.js",
+      "js/elastic_app_search.umd.js",
+      "js/moulinette-search.js",
+      "js/moulinette-util.js",
       "js/moulinette-init.js",
       "js/moulinette.js"
     ],
