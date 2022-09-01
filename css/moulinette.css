@@ -35,14 +35,14 @@
   margin-top: 18px;
 }
 
-#moulinette-panel .logo {
+#moulinette-panel .mtteLogo {
   position: absolute;
   top: 15px;
   left: 15px;
   width: 48px;
 }
 
-#moulinette-panel .content {
+#moulinette-panel .mtteContent {
   margin-top: 25px;
   height: 100%;
 }

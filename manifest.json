@@ -32,10 +32,15 @@
     }
   },
 
+  "options_ui": {
+    "page": "html/options.html",
+    "open_in_tab": false
+  },
+
   "commands": {
     "toggle": {
       "suggested_key": {
-        "default": "Ctrl+M"
+        "default": "Alt+Shift+M"
       },
       "description": "Show/hide Moulinette UI"
     }
@@ -52,6 +57,7 @@
       "js/elastic_app_search.umd.js",
       "js/moulinette-search.js",
       "js/moulinette-util.js",
+      "js/moulinette-patreon.js",
       "js/moulinette-init.js",
       "js/moulinette.js"
     ],

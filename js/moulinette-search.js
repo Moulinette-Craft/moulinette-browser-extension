@@ -1,9 +1,10 @@
 class MoulinetteSearch {
 
+  static INSTANCE = null
   static SERVER_URL = "https://assets.moulinette.cloud"
   static ELASTIC_ENDPOINT = "https://moulinette.ent.westus2.azure.elastic-cloud.com"
   static ELASTIC_ENGINE = "moulinette"
-  static THUMB_BASEURL = "https://mttethumbs.nyc3.digitaloceanspaces.com"
+  static THUMB_BASEURL = "https://mttethumbs.nyc3.cdn.digitaloceanspaces.com"
 
   static MAX_ASSETS = 100
 
@@ -13,47 +14,55 @@ class MoulinetteSearch {
   }
 
   /**
+   * Returns the unique instance of the client (and creates it the first time)
+   */
+  static async getUniqueInstance() {
+    if(!MoulinetteSearch.INSTANCE) {
+      // retrieve user from server
+      const patreon = new MoulinettePatreon()
+      const sessionId = await patreon.getSessionId()
+      // create new instance
+      MoulinetteSearch.INSTANCE = new MoulinetteSearch(sessionId)
+      await MoulinetteSearch.INSTANCE.init()
+    }
+    return MoulinetteSearch.INSTANCE
+  }
+
+  /**
    * Initializes Moulinette by creating an ElasticSearch client
    */
   async init() {
-    let searchKey = await chrome.storage.local.get("searchKey")
-    if(!searchKey || !searchKey.searchKey) {
-      console.log("MoulinetteSearch | Retrieving search key from Moulinette Server")
-      let results = await fetch(`${MoulinetteSearch.SERVER_URL}/search/keys/${this.sessionId}`).catch(function(e) {
-        console.log(`MoulinetteSearch | Something went wrong while fetching search keys from the server`)
-        console.warn(e)
-        return {}
-      })
+    console.log("MoulinetteSearch | Retrieving search key from Moulinette Server")
+    let results = await fetch(`${MoulinetteSearch.SERVER_URL}/search/keys/${this.sessionId}`).catch(function(e) {
+      console.log(`MoulinetteSearch | Something went wrong while fetching search keys from the server`)
+      console.warn(e)
+      return {}
+    })
 
-      if(results) {
-        results = await results.json()
-        if(results.search && results.search.length > 0) {
-          searchKey = results.search
-          await chrome.storage.local.set({ searchKey: searchKey})
-        }
+    let searchKey = null
+    if(results) {
+      results = await results.json()
+      if(results.search && results.search.length > 0) {
+        this.elastic = window.ElasticAppSearch.createClient({
+          endpointBase: MoulinetteSearch.ELASTIC_ENDPOINT,
+          searchKey: results.search,
+          engineName: MoulinetteSearch.ELASTIC_ENGINE,
+          cacheResponses: false
+        })
+        return console.log("MoulinetteSearch | Search engine initialized!")
       }
     }
-    else {
-      searchKey = searchKey.searchKey
-    }
 
-    if(searchKey) {
-      this.elastic = window.ElasticAppSearch.createClient({
-        endpointBase: MoulinetteSearch.ELASTIC_ENDPOINT,
-        searchKey: searchKey,
-        engineName: MoulinetteSearch.ELASTIC_ENGINE,
-        cacheResponses: false
-      })
-      console.log("MoulinetteSearch | Search engine initialized!")
-    } else {
-      console.warn(`MoulinetteSearch | You are not authorized to use this function. Make sure your Patreon account is linked to Moulinette.`)
-    }
+    console.warn(`MoulinetteSearch | You are not authorized to use this function. Make sure your Patreon account is linked to Moulinette.`)
   }
 
   /**
    * Executes a search and returns the results
    */
   async search(terms) {
+    if(!this.elastic) {
+      return console.warn("MoulinetteSearch | You are not authorized to use this function. Make sure your Patreon account is linked to Moulinette.!")
+    }
     if(this.pending) {
       return console.warn("MoulinetteSearch | Moulinette already searching ... please wait!")
     }
@@ -88,6 +97,42 @@ class MoulinetteSearch {
     }
 
     return results;
+  }
+
+  /**
+   * Returns the URL of the image matching the search id
+   */
+  async getImageURL(id) {
+    const url = this.sessionId
+    let result = await fetch(`${MoulinetteSearch.SERVER_URL}/search/imageurl/${this.sessionId}/${id}`).catch(function(e) {
+      console.log(`MoulinetteSearch | No matching image on server with id ${id}`)
+      console.warn(e)
+      return null
+    })
+    result = await result.json()
+    if(result && result.url) {
+      return result.url
+    }
+    return null
+  }
+
+  /**
+   * Downloads image matching id
+   * Returns a File object with the binary file representing the image
+   */
+  async downloadImage(id, name) {
+    const url = await this.getImageURL(id)
+    if(url) {
+      let res = await fetch(url).catch(function(e) {
+        console.log(`MoulinetteSearch | Not able to download the image`, e)
+      });
+      if(res) {
+        const blob = await res.blob()
+        return new File([blob], name, { type: blob.type, lastModified: new Date() })
+      }
+    }
+
+    return null;
   }
 
 
