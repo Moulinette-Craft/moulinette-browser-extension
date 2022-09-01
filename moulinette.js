@@ -5,7 +5,7 @@ chrome.action.onClicked.addListener((tab) => {
     func: () => {
       const panel = document.getElementById("moulinette-panel")
       panel.style.display = (panel.style.display == 'none') ? 'block' : 'none';
-      //$("#moulinette-panel").toggle()
+      document.getElementById("mtteSearch").focus()
     },
   });
   /*
@@ -13,13 +13,5 @@ chrome.action.onClicked.addListener((tab) => {
     target: {tabId: tab.id},
     files: ['moulinette-ui.js']
   });*/
-});
-
-
-chrome.commands.onCommand.addListener(function (command) {
-  console.log("HERE")
-  if (command === 'toggle') {
-    $("#moulinette-panel").toggle()
-  }
 });
 

@@ -59,12 +59,14 @@ class MoulinetteSearch {
   /**
    * Executes a search and returns the results
    */
-  async search(terms) {
+  async search(terms, page = 1) {
     if(!this.elastic) {
-      return console.warn("MoulinetteSearch | You are not authorized to use this function. Make sure your Patreon account is linked to Moulinette.!")
+      console.warn("MoulinetteSearch | You are not authorized to use this function. Make sure your Patreon account is linked to Moulinette.!")
+      return "You need first to link Moulinette to your Patreon (under the module's options)"
     }
     if(this.pending) {
-      return console.warn("MoulinetteSearch | Moulinette already searching ... please wait!")
+      console.warn("MoulinetteSearch | Moulinette already searching ... please wait!")
+      return "Already searching... please wait!"
     }
     this.pending = true
 
@@ -75,15 +77,13 @@ class MoulinetteSearch {
     }
 
     const elasticOptions = {
-      page: { size: MoulinetteSearch.MAX_ASSETS, current: 1 },
+      page: { size: MoulinetteSearch.MAX_ASSETS, current: page },
       //facets: facets,
       filters:  optionsFilters
     }
 
     const resultList = await this.elastic.search(terms, elasticOptions)
-    console.log(resultList.rawInfo.meta.page)
     this.pending = false
-
 
     const results = []
     for(const r of resultList.results) {
@@ -96,8 +96,9 @@ class MoulinetteSearch {
       }
     }
 
-    return results;
+    return {results: results, meta: resultList.rawInfo.meta.page};
   }
+
 
   /**
    * Returns the URL of the image matching the search id
