@@ -5,9 +5,18 @@
   bottom: 0px;
   right: 400px;
   z-index: 8000000000000000000;
-  background: yellow;
-  opacity: 30%;
+  background:rgba(255, 255, 0, 0.3);
   display: none;
+}
+
+.mtteInstructions {
+  font-size: 12px;
+  position: relative;
+  margin: 10px;
+  padding: 5px 15px;
+  width: 300px;
+  background-color: white;
+  border: 1px solid #444;
 }
 
 #moulinette-panel {
