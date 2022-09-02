@@ -12,6 +12,29 @@ $( document ).ready(async function() {
     $("#mtteSearch").focus()
 
     /**
+     * Utility function to preview an image
+     */
+    async function moulinettePreview(id) {
+      const client = await MoulinetteSearch.getUniqueInstance()
+      const doc = await client.getDocument(id)
+      console.log(doc)
+      if(doc) {
+        const url = await client.getImageURL(id)
+        const filename = doc.name.split("/").pop()
+        $("#moulinette-preview .mtteImgPreview").attr("src",url);
+        // update image sizes
+        $("#moulinette-preview .mtteImgPreview").on("load", function() {
+          const image = document.querySelector("#moulinette-preview .mtteImgPreview");
+          $("#moulinette-preview .mtteSize").html(`${image.naturalWidth} x ${image.naturalHeight}`)
+        })
+
+        $("#moulinette-preview .mtteTitle").html(filename)
+        $("#moulinette-preview .mtteCreator").html(doc.publisher)
+        $("#moulinette-preview .mttePack").html(doc.pack)
+      }
+    }
+
+    /**
      * Utility function for moulinette search
      */
     async function moulinetteSearch(terms, page = 1) {
@@ -37,7 +60,7 @@ $( document ).ready(async function() {
         // listener : dragging the image
         $(".tileres").off()
         $(".tileres").on('dragstart', function(ev) {
-          $("#moulinette-drop").show()
+          changeDropZoneVisibility(true)
           const asset = $(ev.currentTarget)
           ev.originalEvent.dataTransfer.setData("Moulinette", JSON.stringify({
             id: asset.data("id"),
@@ -45,16 +68,28 @@ $( document ).ready(async function() {
           }));
         });
 
-        // listener : right clicking => download
+        // listener : click => preview
         $('.tileres').click(async function(ev) {
           const asset = $(ev.currentTarget)
-          location.href = await client.getImageURL(asset.data("id"))
-          return false
+          moulinettePreview(asset.data("id"))
         });
 
         // update counts
         const count = moulinette.meta.current == moulinette.meta.total_pages ? moulinette.meta.total_results : moulinette.meta.size * moulinette.meta.current
         $('#mtteStats').html(`1-${count} of ${moulinette.meta.total_results} results`)
+      }
+    }
+
+    /**
+     * Utility function to show/hide drop zone
+     */
+    function changeDropZoneVisibility(show = true) {
+      if(show) {
+        $("#moulinette-drop").show()
+        $("#moulinette-panel .mtteActions").show()
+      } else {
+        $("#moulinette-drop").hide()
+        $("#moulinette-panel .mtteActions").hide()
       }
     }
 
@@ -96,7 +131,7 @@ $( document ).ready(async function() {
     })
 
     $("#moulinette-drop").on("drop", async function(e) {
-      $("#moulinette-drop").hide()
+      changeDropZoneVisibility(false)
       const client = await MoulinetteSearch.getUniqueInstance()
       let data = e.originalEvent.dataTransfer.getData("Moulinette");
       if(data) {
@@ -123,7 +158,33 @@ $( document ).ready(async function() {
     });
 
     $("#moulinette-drop").click(function(e) {
-      $("#moulinette-drop").hide()
+      changeDropZoneVisibility(false)
+    })
+
+    $("#moulinette-panel .mtteActions").on('dragover', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    })
+
+    $("#moulinette-panel .mtteActions").on('dragenter', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    })
+
+    $("#moulinette-panel .mtteActions").on('drop', async function(ev) {
+      changeDropZoneVisibility(false)
+      const client = await MoulinetteSearch.getUniqueInstance()
+      let data = ev.originalEvent.dataTransfer.getData("Moulinette");
+      if(data) {
+        data = JSON.parse(data)
+        const url = await client.getImageURL(data.id)
+        if(url) {
+          location.href = url
+        } else {
+          console.error("Moulinette | Not able to get a URL for that image!")
+        }
+      }
+      return false
     })
 
   }, 500);

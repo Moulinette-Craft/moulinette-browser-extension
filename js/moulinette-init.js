@@ -20,6 +20,15 @@ if(!moulinette) {
     document.body.appendChild(dropzone);
     $(dropzone).html(data);
   });
+  $.ajax({
+      url: chrome.runtime.getURL("html/moulinette-preview.html"),
+      cache: false
+  }).done(function(data) {
+    const dropzone = document.createElement('div');
+    dropzone.id = "moulinette-preview"
+    document.body.appendChild(dropzone);
+    $(dropzone).html(data);
+  });
 }
 
 

@@ -62,7 +62,7 @@ class MoulinetteSearch {
   async search(terms, page = 1) {
     if(!this.elastic) {
       console.warn("MoulinetteSearch | You are not authorized to use this function. Make sure your Patreon account is linked to Moulinette.!")
-      return "You need first to link Moulinette to your Patreon (under the module's options)"
+      return "You need first to link Moulinette to your Patreon<br/><em>(check the module's options)</em>"
     }
     if(this.pending) {
       console.warn("MoulinetteSearch | Moulinette already searching ... please wait!")
@@ -97,6 +97,44 @@ class MoulinetteSearch {
     }
 
     return {results: results, meta: resultList.rawInfo.meta.page};
+  }
+
+  /**
+   * Executes a search and returns the results
+   */
+  async getDocument(docId) {
+    if(!this.elastic) {
+      console.warn("MoulinetteSearch | You are not authorized to use this function. Make sure your Patreon account is linked to Moulinette.!")
+      return "You need first to link Moulinette to your Patreon<br/><em>(check the module's options)</em>"
+    }
+    if(this.pending) {
+      console.warn("MoulinetteSearch | Moulinette already searching ... please wait!")
+      return "Already searching... please wait!"
+    }
+    this.pending = true
+
+    const elasticOptions = {
+      page: { size: 1, current: 1 },
+      filters: {
+        all: ({ id: docId})
+      }
+    }
+
+    const resultList = await this.elastic.search("", elasticOptions)
+    this.pending = false
+
+    if(resultList && resultList.results) {
+      const data = resultList.results[0].data
+      const result = {}
+      for(const key of Object.keys(data)) {
+        if(data[key].raw) {
+          result[key] = data[key].raw
+        }
+      }
+      return result
+    }
+
+    return null
   }
 
 

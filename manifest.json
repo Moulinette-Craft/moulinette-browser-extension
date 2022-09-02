@@ -65,6 +65,10 @@
 
   "web_accessible_resources": [{
       "matches": ["<all_urls>"],
-      "resources": ["html/moulinette-panel.html", "html/moulinette-drop.html"]
+      "resources": [
+        "html/moulinette-panel.html",
+        "html/moulinette-drop.html",
+        "html/moulinette-preview.html"
+      ]
   }]
 }
