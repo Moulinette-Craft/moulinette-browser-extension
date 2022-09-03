@@ -187,26 +187,97 @@ class MoulinetteSearch {
    * Downloads image matching id
    * Returns a File object with the binary file representing the image
    */
-  async downloadImage(id, name) {
-    const url = await this.getImageURL(id)
-    if(url) {
-      let res = await fetch(url).catch(function(e) {
-        console.warn(`MoulinetteSearch | Not able to download the image`, e)
-      });
-      if(res) {
-        const blob = await res.blob()
-        return new File([blob], name, { type: blob.type, lastModified: new Date() })
-      }
-    }
+  async downloadImageByIdName(id, name) {
+    return this.downloadImage(await this.getImageURL(id))
+  }
 
-    return null;
+  async downloadImage(url) {
+    if(!url) return null
+
+    let res = await fetch(url).catch(function(e) {
+      console.warn(`MoulinetteSearch | Not able to download the image`, e)
+    });
+    if(res) {
+      const blob = await res.blob()
+      return new File([blob], name, { type: blob.type, lastModified: new Date() })
+    }
   }
 
 
-  async getAssets() {
+  async getAssetsByCreator() {
     let res = await fetch(`${MoulinetteSearch.SERVER_URL}/assets/${this.sessionId}`).catch(function(e) {
       console.error(`Moulinette | Not able to fetch assets from Moulinette servers`, e)
     });
-    return await res.json()
+    const creators = {}
+    const data = await res.json()
+    // filter assets for simple images only
+    data.forEach(c => {
+      const packs = []
+      let count = 0
+      c.packs.forEach(p => {
+        const assets = p.assets.filter(a => (typeof a === 'string' || a instanceof String) && a.endsWith(".webp"))
+        if(assets.length > 0) {
+          count += assets.length
+          packs.push({
+            id: p.id,
+            name: p.name,
+            path: p.path,
+            sas: p.sas,
+            assets: assets
+          })
+        }
+      })
+      if(packs.length > 0) {
+        creators[c.publisher] = {
+          count: count,
+          packs: packs
+        }
+      }
+    })
+    return creators;
+  }
+
+  /**
+   * Utility function to filter assets
+   */
+  static filterAssets(assets, creator, terms) {
+    let creators = {}
+    const termsList = terms.toLowerCase().split(" ");
+    Object.keys(assets).forEach(c => {
+      // creator doesn't match
+      if(creator.length > 0 && c !== creator) return
+      const packs = []
+      let count = 0
+      assets[c].packs.forEach(p => {
+        const assets = terms.length == 0 ? p.assets : p.assets.filter(a => {
+          // must contain all terms
+          for(const t of termsList) {
+            if(!a.toLowerCase().includes(t)) {
+              return false
+            }
+          }
+          return true
+        })
+        // add pack
+        if(assets.length > 0) {
+          count += assets.length
+          packs.push({
+            id: p.id,
+            name: p.name,
+            path: p.path,
+            sas: p.sas,
+            assets: assets
+          })
+        }
+      })
+      // add creator
+      if(packs.length > 0) {
+        creators[c] = {
+          count: count,
+          packs: packs
+        }
+      }
+    })
+    return creators
   }
 }

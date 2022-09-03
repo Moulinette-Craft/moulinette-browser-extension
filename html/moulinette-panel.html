@@ -2,13 +2,21 @@
 
 <h1>Moulinette</h1>
 
+<div id="mtteTabs">
+  <span class="mtteSearch active">Search</span>
+  <span class="mtteBrowse">Browse</span>
+</div>
+
 <div class="mtteActions">
   <img src="https://assets.moulinette.cloud/static/images/icons8-download-64.png"/>
 </div>
 
-<div class="mtteContent">
+<div class="mtteContent mtteSearch">
   <input id="mtteSearch" type="text" placeHolder="Type something and press ENTER">
-  <input id="mtteAll" type="checkbox" value="1" title="Search all creators, even if you don't support them"> <span title="Search all creators, even if you don't support them">All</span>
+  <input id="mtteAll" class="mtteAll" type="checkbox" value="1" title="Search all creators, even if you don't support them">
+    <span class="mtteAll" title="Search all creators, even if you don't support them">All</span>
+  <select id="mtteCreators">
+  </select>
 
   <div id="mtteAssets">
   </div>

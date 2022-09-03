@@ -38,10 +38,12 @@
 }
 
 #moulinette-panel h1 {
-  font-size: 28px;
+  color: #666;
+  font-size: 24px;
   font-family: Sans-serif;
   margin-left: 70px;
-  margin-top: 18px;
+  margin-top: 8px;
+  margin-bottom: 1px;
 }
 
 #moulinette-panel .mtteLogo {
@@ -56,21 +58,65 @@
   top: 15px;
   right: 15px;
   display: none;
-  background:rgba(255, 255, 0, 0.3);
 }
 
 #moulinette-panel .mtteActions img {
   width: 48px;
+  margin: 0px;
+  padding: 0px;
+  background:rgba(255, 255, 0, 0.3);
+}
+
+#mtteTabs {
+  margin-left: 70px;
+  border-bottom: 1px solid #bbb;
+  margin-bottom: 0px;
+  padding-bottom: 0px;
+}
+
+#mtteTabs span {
+  font-size: 16px;
+  padding: 0px 10px;
+  color: black;
+  cursor: pointer;
+}
+
+#mtteTabs span:hover {
+  text-decoration: underline;
+}
+
+#mtteTabs span.active {
+  cursor: default;
+  font-weight: bold;
+  font-size: 20px;
+  color: #ff6400;
+}
+
+#mtteTabs span.active:hover {
+  text-decoration: none;
 }
 
 #moulinette-panel .mtteContent {
-  margin-top: 25px;
+  margin-top: 10px;
   height: 100%;
+}
+
+#moulinette-panel .mtteContent.mtteBrowse {
+  display: none;
 }
 
 #moulinette-panel #mtteSearch {
   margin: 0px 10px;
   width: 300px;
+}
+
+#moulinette-panel #mtteSearch.small {
+  width: 150px;
+}
+
+#mtteCreators {
+  display: none;
+  max-width: 200px;
 }
 
 #mtteAssets {
@@ -84,11 +130,37 @@
   overflow-y: auto;
 }
 
+#mtteAssets .tilefolder {
+  background-image: url("https://assets.moulinette.cloud/static/images/package.svg");
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: 12px;
+  padding-left: 18px;
+  font-size: 18px;
+  border-bottom: 1px solid #bbb;
+  line-height: 1;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+
 #mtteAssets .tileres {
   display: inline-flex;
   cursor: grab;
   position: relative;
   margin: 2px;
+}
+
+#mtteAssets .tileres img {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+}
+
+#moulinette-preview .mtteImgPreview {
+  width: 300px;
+  height: 300px;
+  object-fit: contain;
 }
 
 #mtteStats {
