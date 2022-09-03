@@ -170,10 +170,16 @@ class MoulinetteSearch {
       console.warn(e)
       return null
     })
+    if(result.status != 200) {
+      console.log(`MoulinetteSearch | You don't have access to that image!`)
+      return null;
+    }
+
     result = await result.json()
     if(result && result.url) {
       return result.url
     }
+
     return null
   }
 
@@ -185,7 +191,7 @@ class MoulinetteSearch {
     const url = await this.getImageURL(id)
     if(url) {
       let res = await fetch(url).catch(function(e) {
-        console.log(`MoulinetteSearch | Not able to download the image`, e)
+        console.warn(`MoulinetteSearch | Not able to download the image`, e)
       });
       if(res) {
         const blob = await res.blob()

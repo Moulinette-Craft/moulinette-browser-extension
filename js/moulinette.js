@@ -185,7 +185,10 @@ $( document ).ready(async function() {
             const res = cur.dispatchEvent(event);
             cur = cur.parentElement
           }
+        } else {
+          moulinettePreview(data.id)
         }
+
       }
     });
 
@@ -213,7 +216,7 @@ $( document ).ready(async function() {
         if(url) {
           location.href = url
         } else {
-          console.error("Moulinette | Not able to get a URL for that image!")
+          moulinettePreview(data.id)
         }
       }
       return false
