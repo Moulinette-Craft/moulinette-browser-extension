@@ -68,9 +68,9 @@
   height: 100%;
 }
 
-#moulinette-panel input.search {
+#moulinette-panel #mtteSearch {
   margin: 0px 10px;
-  width: 380px;
+  width: 300px;
 }
 
 #mtteAssets {
@@ -110,7 +110,7 @@
   left: 50%;
   margin: 0px 0 0 -170px;
 
-  /*display: none;*/
+  display: none;
 }
 
 #moulinette-preview img {

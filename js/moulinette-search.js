@@ -60,7 +60,7 @@ class MoulinetteSearch {
   /**
    * Executes a search and returns the results
    */
-  async search(terms, page = 1) {
+  async search(terms, page = 1, pledges = []) {
     if(!this.elastic) {
       console.warn("MoulinetteSearch | You are not authorized to use this function. Make sure your Patreon account is linked to Moulinette.!")
       return "You need first to link Moulinette to your Patreon<br/><em>(check the module's options)</em>"
@@ -74,7 +74,16 @@ class MoulinetteSearch {
     // prepare filters
     // - only tiles/images
     const optionsFilters = {
-      all: ({category: "image"})
+      all: [{category: "image"}]
+    }
+
+    // apply permissions if pledges are provided
+    if(pledges && pledges.length > 0) {
+      const perms = pledges.map(p => Number(p.id))
+      perms.push(0) // 0 = free (available to anyone)
+      optionsFilters.all.push({
+        perm: perms
+      })
     }
 
     const elasticOptions = {

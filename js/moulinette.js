@@ -37,11 +37,15 @@ $( document ).ready(async function() {
       if(doc) {
         const data = await client.getPackDetails(doc.publisher, doc.pack)
         let url = await client.getImageURL(id)
+        $("#moulinette-preview .mtteImgPreview").attr("width",url ? "300" : "100");
         if(!url) {
-          url = `${MoulinetteSearch.THUMB_BASEURL}/${doc.base/doc.path}_thumb.webp`
+          url = `${MoulinetteSearch.THUMB_BASEURL}/${doc.base}/${doc.path}_thumb.webp`
         }
         const patreonURL = data ? data.publisherUrl : null
-        const tiers = data ? data.tiers.map(t => t.title) : null
+        let tiers = data ? data.tiers.map(t => t.title) : null
+        if(doc.perm.includes(0)) {
+          tiers = ["- (Free)"]
+        }
 
         $("#moulinette-preview .mtteImgPreview").attr("src",url);
         // update image sizes
@@ -62,10 +66,12 @@ $( document ).ready(async function() {
     /**
      * Utility function for moulinette search
      */
-    async function moulinetteSearch(terms, page = 1) {
+    async function moulinetteSearch(terms, page = 1, allCreators = false) {
+      const patreon = new MoulinettePatreon()
+      const user = await patreon.getPatronUser()
       const client = await MoulinetteSearch.getUniqueInstance()
       if(terms && terms.length >= 3) {
-        const results = await client.search(terms, page)
+        const results = await client.search(terms, page, allCreators ? null : user.pledges)
         // exception handling
         if(typeof results === 'string' || results instanceof String) {
           $("#mtteAssets").html(`<div class="mtteWarning">${results}</div>`);
@@ -123,7 +129,7 @@ $( document ).ready(async function() {
      */
     $("#mtteSearch").keyup(async function(e) {
       if(e.keyCode == 13) {
-        moulinetteSearch($("#mtteSearch").val(), 1)
+        moulinetteSearch($("#mtteSearch").val(), 1, $("#mtteAll").prop('checked'))
       }
     });
 

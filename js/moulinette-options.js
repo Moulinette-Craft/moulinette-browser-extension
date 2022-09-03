@@ -13,7 +13,7 @@ $( document ).ready(async function() {
       html += `<br/><span style="color: green">You're supporting moulinette! (${user.patron ? user.patron : "platinum creator"})</span>".`
       html += "<br/><h4>Your pledges</h4><ul>"
       for(const p of user.pledges) {
-        html += `<li>${p.pledge}</li>`
+        html += `<li><b>${p.vanity}</b> : ${p.pledge}</li>`
       }
       html += `</ul><button id="mttePatreonDisconnect">Disconnect</button>`
     } else {
