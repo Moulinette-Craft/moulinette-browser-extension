@@ -224,6 +224,13 @@ $( document ).ready(async function() {
     }
 
     /**
+     * Trigger search when checkbox is clicked
+     */
+    $("#mtteAll").change(function(ev) {
+      moulinetteSearch($("#mtteSearch").val(), 1, $("#mtteAll").prop('checked'))
+    })
+
+    /**
      * Execute search
      */
     $("#mtteSearch").keyup(async function(e) {
@@ -268,6 +275,7 @@ $( document ).ready(async function() {
         $("#mtteSearch").removeClass("small") // make search bar default size
         $(".mtteAll").show()                  // show "All creators" checkbox (for search)
         $("#mtteAssets").html("")
+        moulinetteSearch($("#mtteSearch").val(), 1, $("#mtteAll").prop('checked'))
       }
 
       // highlight tab
