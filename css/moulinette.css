@@ -102,13 +102,15 @@
   background-color: #DFDDD1;
   border: 2px solid #543c24;
   width: 300px;
-  height: 450px;
+  height: 500px;
   padding: 20px;
 
   position: absolute;
   top: 10%;
   left: 50%;
   margin: 0px 0 0 -170px;
+
+  /*display: none;*/
 }
 
 #moulinette-preview img {
@@ -126,11 +128,18 @@
 #moulinette-preview .mtteTitle {
   font-weight: bold;
   line-height: 1.1;
+  height: 30px;
 }
 
 #moulinette-preview .mtteAbout {
   margin-bottom: 10px;
   font-style: italic;¨
+}
+
+#moulinette-preview .mtteClose {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
 }
 
 .mtteWarning {

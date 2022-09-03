@@ -12,15 +12,37 @@ $( document ).ready(async function() {
     $("#mtteSearch").focus()
 
     /**
+     * Clears the UI
+     */
+    function moulinettePreviewClear() {
+      $("#moulinette-preview .mtteTitle").html("Loading ...")
+      $("#moulinette-preview .mtteImgPreview").attr("src", MoulinetteSearch.THUMB_DEFAULT);
+      $("#moulinette-preview .mtteInfo").hide()
+    }
+
+    /**
      * Utility function to preview an image
      */
     async function moulinettePreview(id) {
+      // clear UI
+      moulinettePreviewClear()
+      $("#moulinette-preview").show()
+
+      // load data
+      const patreon = new MoulinettePatreon()
+      const user = await patreon.getPatronUser()
       const client = await MoulinetteSearch.getUniqueInstance()
       const doc = await client.getDocument(id)
-      console.log(doc)
+
       if(doc) {
-        const url = await client.getImageURL(id)
-        const filename = doc.name.split("/").pop()
+        const data = await client.getPackDetails(doc.publisher, doc.pack)
+        let url = await client.getImageURL(id)
+        if(!url) {
+          url = `${MoulinetteSearch.THUMB_BASEURL}/${doc.base/doc.path}_thumb.webp`
+        }
+        const patreonURL = data ? data.publisherUrl : null
+        const tiers = data ? data.tiers.map(t => t.title) : null
+
         $("#moulinette-preview .mtteImgPreview").attr("src",url);
         // update image sizes
         $("#moulinette-preview .mtteImgPreview").on("load", function() {
@@ -28,9 +50,12 @@ $( document ).ready(async function() {
           $("#moulinette-preview .mtteSize").html(`${image.naturalWidth} x ${image.naturalHeight}`)
         })
 
-        $("#moulinette-preview .mtteTitle").html(filename)
-        $("#moulinette-preview .mtteCreator").html(doc.publisher)
+
+        $("#moulinette-preview .mtteTitle").html(doc.name.split("/").pop())
+        $("#moulinette-preview .mtteCreator").html(patreonURL ? `<a href="${data.publisherUrl}" target="_blank">${doc.publisher}</a>` : doc.publisher)
         $("#moulinette-preview .mttePack").html(doc.pack)
+        $("#moulinette-preview .mtteTiers").html(tiers ? tiers.join(", ") : "???")
+        $("#moulinette-preview .mtteInfo").show()
       }
     }
 
@@ -119,6 +144,7 @@ $( document ).ready(async function() {
       }
     });
 
+    $("#moulinette-preview button").click(e => $("#moulinette-preview").hide() )
 
     $("#moulinette-drop").on('dragover', function(e) {
       e.preventDefault();

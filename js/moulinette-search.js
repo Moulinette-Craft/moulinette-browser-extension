@@ -5,6 +5,7 @@ class MoulinetteSearch {
   static ELASTIC_ENDPOINT = "https://moulinette.ent.westus2.azure.elastic-cloud.com"
   static ELASTIC_ENGINE = "moulinette"
   static THUMB_BASEURL = "https://mttethumbs.nyc3.cdn.digitaloceanspaces.com"
+  static THUMB_DEFAULT = "https://assets.moulinette.cloud/static/images/moulinette-preview.png"
 
   static MAX_ASSETS = 100
 
@@ -137,6 +138,18 @@ class MoulinetteSearch {
     return null
   }
 
+  /**
+   * Returns the details about the pack
+   */
+  async getPackDetails(creator, pack) {
+    const results = await fetch(`${MoulinetteSearch.SERVER_URL}/asset/${creator}/${pack}`).catch(function(e) {
+      console.log(`MoulinetteSearch | Something went wrong while fetching pack data from the server`)
+      console.warn(e)
+      return null;
+    })
+
+    return results ? await results.json() : null
+  }
 
   /**
    * Returns the URL of the image matching the search id
