@@ -152,7 +152,7 @@ $( document ).ready(async function() {
 
       // list assets
       let resultsHTML = ""
-      Object.keys(creators).sort().forEach(c => {
+      Object.keys(creators).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())).forEach(c => {
         creators[c].packs.forEach(p => {
           resultsHTML += `<div class="tilefolder" data-creator="${c}" data-pack="${p.id}">${creator.length > 0 ? p.name : `<b>${c}</b> : ${p.name}`} (${p.assets.length})</div>`
         })
@@ -264,7 +264,9 @@ $( document ).ready(async function() {
           moulinette.assets = await client.getAssetsByCreator()
         }
         // update list of filters
-        const creators = Object.keys(moulinette.assets)
+        const creators = Object.keys(moulinette.assets).sort(function (a, b) {
+          return a.toLowerCase().localeCompare(b.toLowerCase());
+        });
         const options = creators.map(c => `<option value="${c}">${c}</option>`)
         $("#mtteCreators").html("<option value=\"\">-- All creators --</option>" + options)
         moulinetteFilter($("#mtteSearch").val(), $('#mtteCreators').find(":selected").val())

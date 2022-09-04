@@ -274,7 +274,7 @@ class MoulinetteSearch {
       if(packs.length > 0) {
         creators[c] = {
           count: count,
-          packs: packs
+          packs: packs.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
         }
       }
     })
