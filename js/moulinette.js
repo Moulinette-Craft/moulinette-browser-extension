@@ -254,9 +254,9 @@ $( document ).ready(async function() {
       } else if(e.currentTarget.classList.contains("mtteBrowse")) {
         moulinette.tab = "browse"
         // adapt UI
-        $(".mtteAll").hide()                // hide "All creators" checkbox (for search)
-        $("#mtteSearch").addClass("small")  // make search bar smaller
-        $("#mtteCreators").show()           // show filters (list of creators)
+        $(".mtteAll").hide()                              // hide "All creators" checkbox (for search)
+        $("#mtteSearch").addClass("small")                // make search bar smaller
+        $("#mtteCreators").css("display", "inline-block") // show filters (list of creators)
         $("#mtteCreators").html("<option>Loading...</option>")
         const client = await MoulinetteSearch.getUniqueInstance()
         if(!moulinette.assets) {
