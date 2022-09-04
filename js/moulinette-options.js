@@ -23,6 +23,7 @@ $( document ).ready(async function() {
     // code for disconnect button
     $("#mttePatreonDisconnect").click( async function(ev) {
       await chrome.storage.local.remove("sessionId")
+      await chrome.storage.local.remove("patronUser")
       location.reload()
     })
   } else {

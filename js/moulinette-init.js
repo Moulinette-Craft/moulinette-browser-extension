@@ -5,6 +5,7 @@ if(!moulinette) {
       cache: false
   }).done(function(data) {
     const panel = document.createElement('div');
+    panel.style.display = "none"
     panel.id = "moulinette-panel"
     document.body.appendChild(panel);
     $(panel).html(data);
