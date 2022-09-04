@@ -33,8 +33,8 @@ class MoulinettePatreon {
    */
   async getPatronUser() {
     // hardcoded test
-    await chrome.storage.local.remove("patronUser")
-    await chrome.storage.local.set({ sessionId: "cv5bl1p0bzpwh0dk2hm7vor3vy" })
+    //await chrome.storage.local.remove("patronUser")
+    //await chrome.storage.local.set({ sessionId: "cv5bl1p0bzpwh0dk2hm7vor3vy" })
 
     const user = await chrome.storage.local.get("patronUser")
     const data = await chrome.storage.local.get("sessionId")

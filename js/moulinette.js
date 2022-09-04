@@ -5,6 +5,7 @@ $( document ).ready(async function() {
   setTimeout(function() {
 
     const moulinette = { tab: "search" }
+    const NO_RESULT = `<div class="mtteWarning">No result. Try with other search terms.</div>`
 
     /**
      * Bring focus to search field
@@ -156,7 +157,8 @@ $( document ).ready(async function() {
           resultsHTML += `<div class="tilefolder" data-creator="${c}" data-pack="${p.id}">${creator.length > 0 ? p.name : `<b>${c}</b> : ${p.name}`} (${p.assets.length})</div>`
         })
       })
-      $("#mtteAssets").html(resultsHTML)
+
+      $("#mtteAssets").html(resultsHTML.length > 0 ? resultsHTML : NO_RESULT)
 
       // update counts
       let count = 0

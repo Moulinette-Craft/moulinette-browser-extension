@@ -1,5 +1,6 @@
 
 $( document ).ready(async function() {
+
   const patreon = new MoulinettePatreon()
   const user = await patreon.getPatronUser()
   const msgBox = $("#mttePatreon")
