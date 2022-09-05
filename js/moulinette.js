@@ -363,7 +363,6 @@ $( document ).ready(async function() {
         // download the image from server
         const filename = data.name + ".webp"
         const file = data.url ? await client.downloadImage(data.url, filename) : await client.downloadImageByIdName(data.id, filename)
-        console.log(file)
         if(file) {
           const dataTransfer = new DataTransfer();
           dataTransfer.items.add(file);

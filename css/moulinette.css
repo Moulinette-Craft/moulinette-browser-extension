@@ -220,6 +220,13 @@
   bottom: 2px;
 }
 
+#mtteLinks
+{
+  position: fixed;
+  right: 270px;
+  bottom: 2px;
+}
+
 #moulinette-preview {
   z-index: 8000000000000000000;
   background-color: #DFDDD1;
