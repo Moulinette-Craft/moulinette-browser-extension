@@ -188,10 +188,10 @@ class MoulinetteSearch {
    * Returns a File object with the binary file representing the image
    */
   async downloadImageByIdName(id, name) {
-    return this.downloadImage(await this.getImageURL(id))
+    return this.downloadImage(await this.getImageURL(id), name)
   }
 
-  async downloadImage(url) {
+  async downloadImage(url, name) {
     if(!url) return null
 
     let res = await fetch(url).catch(function(e) {
@@ -199,7 +199,7 @@ class MoulinetteSearch {
     });
     if(res) {
       const blob = await res.blob()
-      return new File([blob], name, { type: blob.type, lastModified: new Date() })
+      return new File([blob], name, { type: "image/webp", lastModified: new Date() })
     }
   }
 

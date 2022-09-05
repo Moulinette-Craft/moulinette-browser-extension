@@ -62,13 +62,6 @@
   background-color: white;
 }
 
-#moulinette-panel .asset {
-  background-color: red;
-  width: 100px;
-  height: 100px;
-  cursor: grab;
-}
-
 #moulinette-panel h1 {
   color: #666;
   font-size: 24px;
@@ -205,17 +198,14 @@
   cursor: pointer;
 }
 
-#mtteAssets .tileres {
+#mtteAssets .mtteAsset {
   display: inline-flex;
-  cursor: grab;
-  position: relative;
-  margin: 2px;
-}
-
-#mtteAssets .tileres img {
   width: 70px;
   height: 70px;
-  object-fit: contain;
+  cursor: grab;
+  background-position: center;
+  background-size: 70px;
+  margin: 2px;
 }
 
 #moulinette-preview .mtteImgPreview {

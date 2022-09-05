@@ -113,7 +113,7 @@ $( document ).ready(async function() {
         let resultsHTML = ""
         moulinette.meta = results.meta
         results.results.forEach(r => {
-          resultsHTML += `<div class="tileres draggable" title="${r.name}" data-id="${r.id}"><img src="${r.url}"/></div>`
+          resultsHTML += `<div class="mtteAsset" title="${r.name}" data-id="${r.id}" draggable="true" style="background-image: url('${encodeURI(r.url)}')"></div>`
         })
         if(page == 1) {
           $("#mtteAssets").html(resultsHTML)
@@ -122,23 +122,23 @@ $( document ).ready(async function() {
         }
 
         // listener : dragging the image
-        $(".tileres").off()
-        $(".tileres").on('dragstart', function(ev) {
+        $(".mtteAsset").off()
+        $(".mtteAsset").on('dragstart', function(ev) {
           changeDropZoneVisibility(true)
           const asset = $(ev.currentTarget)
           ev.originalEvent.dataTransfer.setData("Moulinette", JSON.stringify({
             id: asset.data("id"),
-            name: asset.attr("title")
+            name: asset.attr("title").split("/").pop()
           }));
         });
 
         // listener : click => preview
-        $('.tileres').click(async function(ev) {
+        $('.mtteAsset').click(async function(ev) {
           const asset = $(ev.currentTarget)
           moulinettePreview(asset.data("id"))
         });
 
-        $('.tileres').mousedown(async function(ev) {
+        $('.mtteAsset').mousedown(async function(ev) {
           if (event.which === 3) {
             const asset = $(ev.currentTarget)
             const url = await client.getImageURL(asset.data("id"))
@@ -184,7 +184,7 @@ $( document ).ready(async function() {
 
         // data already loaded => toggle visibility
         if(e.currentTarget.classList.contains("mtteLoaded")) {
-          return $(`#mtteAssets .tileres.p${pack}`).toggle();
+          return $(`#mtteAssets .mtteAsset.p${pack}`).toggle();
         }
         // load data
         if(creators[creator]) {
@@ -193,13 +193,13 @@ $( document ).ready(async function() {
             let html = ""
             selPack[0].assets.forEach(a => {
               const imageURL = `${selPack[0].path}/${a.replace(".webp", "_thumb.webp")}?${selPack[0].sas ? selPack[0].sas : ""}`
-              html += `<div class="tileres draggable p${selPack[0].id}" title="${a}"><img src="${imageURL}"/></div>`
+              html += `<div class="mtteAsset p${selPack[0].id}" title="${a}" draggable="true" style="background-image: url('${imageURL}')"></div>`
             })
             $(e.currentTarget).after(html)
 
             // listener : dragging the image
-            $(".tileres").off()
-            $(".tileres").on('dragstart', function(ev) {
+            $(".mtteAsset").off()
+            $(".mtteAsset").on('dragstart', function(ev) {
               changeDropZoneVisibility(true)
               const folder = $(ev.currentTarget).prevAll(".tilefolder:first");
               const assetPath = $(ev.currentTarget).attr("title")
@@ -207,15 +207,26 @@ $( document ).ready(async function() {
               const bPack = bCreator.packs.find(p => p.id == folder.data("pack"))
 
               ev.originalEvent.dataTransfer.setData("Moulinette", JSON.stringify({
-                url: `${bPack.path}/${assetPath}?${bPack.sas ? bPack.sas : ""}`
+                url: `${bPack.path}/${assetPath}?${bPack.sas ? bPack.sas : ""}`,
+                name: $(ev.currentTarget).attr("title").split("/").pop()
               }));
             });
 
             // listener : click => preview
-            $('.tileres').click(async function(ev) {
+            $('.mtteAsset').click(async function(ev) {
               const folder = $(ev.currentTarget).prevAll(".tilefolder:first");
               const asset = $(ev.currentTarget).attr("title")
               moulinettePreview(null, folder.data("creator"), folder.data("pack"), asset)
+            });
+
+            $('.mtteAsset').mousedown(async function(ev) {
+              if (event.which === 3) {
+                const folder = $(ev.currentTarget).prevAll(".tilefolder:first");
+                const assetPath = $(ev.currentTarget).attr("title")
+                const bCreator = moulinette.assets[folder.data("creator")]
+                const bPack = bCreator.packs.find(p => p.id == folder.data("pack"))
+                location.href = `${bPack.path}/${assetPath}?${bPack.sas ? bPack.sas : ""}`
+              }
             });
           }
         }
@@ -350,7 +361,9 @@ $( document ).ready(async function() {
         data = JSON.parse(data)
 
         // download the image from server
-        const file = data.url ? await client.downloadImage(data.url) : await client.downloadImageByIdName(data.id, data.name)
+        const filename = data.name + ".webp"
+        const file = data.url ? await client.downloadImage(data.url, filename) : await client.downloadImageByIdName(data.id, filename)
+        console.log(file)
         if(file) {
           const dataTransfer = new DataTransfer();
           dataTransfer.items.add(file);
