@@ -32,30 +32,34 @@
   background-color: #DFDDD1;
 }
 
+#moulinette-panel img {
+  border: 0px;
+}
+
 /** Force default style **/
 #moulinette-panel .mtteContent input[type='text'] {
-    writing-mode: horizontal-tb !important;
-    text-rendering: auto;
-    color: fieldtext;
-    border: 0px
-    letter-spacing: normal;
-    word-spacing: normal;
-    line-height: normal;
-    text-transform: none;
-    text-indent: 0px;
-    text-shadow: none;
-    display: inline-block;
-    text-align: start;
-    appearance: auto;
-    cursor: text;
-    background-color: field;
-    margin: 0em;
-    padding: 1px 2px;
-    border-width: 2px;
-    border-style: inset;
-    border-color: -internal-light-dark(rgb(118, 118, 118), rgb(133, 133, 133));
-    border-image: initial;
-    background-color: white;
+  writing-mode: horizontal-tb !important;
+  text-rendering: auto;
+  color: fieldtext;
+  border: 0px
+  letter-spacing: normal;
+  word-spacing: normal;
+  line-height: normal;
+  text-transform: none;
+  text-indent: 0px;
+  text-shadow: none;
+  display: inline-block;
+  text-align: start;
+  appearance: auto;
+  cursor: text;
+  background-color: field;
+  margin: 0em;
+  padding: 1px 2px;
+  border-width: 2px;
+  border-style: inset;
+  border-color: -internal-light-dark(rgb(118, 118, 118), rgb(133, 133, 133));
+  border-image: initial;
+  background-color: white;
 }
 
 #moulinette-panel .asset {
@@ -72,6 +76,7 @@
   margin-left: 70px;
   margin-top: 8px;
   margin-bottom: 1px;
+  border: 0px;
 }
 
 #moulinette-panel .mtteLogo {
@@ -136,6 +141,10 @@
 #moulinette-panel #mtteSearch {
   margin: 0px 10px;
   width: 300px;
+}
+
+#moulinette-panel label {
+  display: inline-block;
 }
 
 #moulinette-panel #mtteSearch.small {

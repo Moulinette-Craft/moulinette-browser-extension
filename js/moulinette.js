@@ -138,6 +138,18 @@ $( document ).ready(async function() {
           moulinettePreview(asset.data("id"))
         });
 
+        $('.tileres').mousedown(async function(ev) {
+          if (event.which === 3) {
+            const asset = $(ev.currentTarget)
+            const url = await client.getImageURL(asset.data("id"))
+            if(url) {
+              location.href = url
+            } else if(data.id) {
+              moulinettePreview(data.id)
+            }
+          }
+        });
+
         // update counts
         const count = moulinette.meta.current == moulinette.meta.total_pages ? moulinette.meta.total_results : moulinette.meta.size * moulinette.meta.current
         $('#mtteStats').html(`1-${count} of ${moulinette.meta.total_results} results`)
