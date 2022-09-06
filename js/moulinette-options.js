@@ -22,8 +22,8 @@ $( document ).ready(async function() {
 
     // code for disconnect button
     $("#mttePatreonDisconnect").click( async function(ev) {
-      await chrome.storage.local.remove("sessionId")
-      await chrome.storage.local.remove("patronUser")
+      await (browser ? browser : chrome).storage.local.remove("sessionId")
+      await (browser ? browser : chrome).storage.local.remove("patronUser")
       location.reload()
     })
   } else {
@@ -44,7 +44,8 @@ $( document ).ready(async function() {
       }
 
       timerIter++;
-      msgBox.html(msgBox.text() + ".")
+      const sessionId = await patreon.getSessionId()
+      msgBox.html(msgBox.text() + "." + sessionId + "<br/>")
 
       if(await patreon.isReady()) {
         clearInterval(timer);

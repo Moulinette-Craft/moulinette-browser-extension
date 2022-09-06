@@ -44,7 +44,7 @@ class MoulinetteSearch {
     if(results) {
       results = await results.json()
       if(results.search && results.search.length > 0) {
-        this.elastic = window.ElasticAppSearch.createClient({
+        this.elastic = ElasticAppSearch.createClient({
           endpointBase: MoulinetteSearch.ELASTIC_ENDPOINT,
           searchKey: results.search,
           engineName: MoulinetteSearch.ELASTIC_ENGINE,

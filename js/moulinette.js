@@ -1,4 +1,16 @@
 
+/**
+ * Request for toggling right panel
+ */
+browser.runtime.onMessage.addListener((request) => {
+  if(request.action === "togglePanel") {
+    const panel = document.getElementById("moulinette-panel")
+    panel.style.display = (panel.style.display == 'none') ? 'block' : 'none';
+    document.getElementById("mtteSearch").focus()
+  }
+  return Promise.resolve({ response: "Done" });
+});
+
 $( document ).ready(async function() {
 
   // for some reasons, the moulinette part is getting added sometimes after the ready
@@ -139,7 +151,7 @@ $( document ).ready(async function() {
         });
 
         $('.mtteAsset').mousedown(async function(ev) {
-          if (event.which === 3) {
+          if (ev.which === 3) {
             const asset = $(ev.currentTarget)
             const url = await client.getImageURL(asset.data("id"))
             if(url) {
@@ -220,7 +232,7 @@ $( document ).ready(async function() {
             });
 
             $('.mtteAsset').mousedown(async function(ev) {
-              if (event.which === 3) {
+              if (ev.which === 3) {
                 const folder = $(ev.currentTarget).prevAll(".tilefolder:first");
                 const assetPath = $(ev.currentTarget).attr("title")
                 const bCreator = moulinette.assets[folder.data("creator")]
@@ -361,7 +373,7 @@ $( document ).ready(async function() {
         data = JSON.parse(data)
 
         // download the image from server
-        const filename = data.name + ".webp"
+        const filename = data.name + (data.name.endsWith(".webp") ? "" : ".webp")
         const file = data.url ? await client.downloadImage(data.url, filename) : await client.downloadImageByIdName(data.id, filename)
         if(file) {
           const dataTransfer = new DataTransfer();
@@ -378,7 +390,9 @@ $( document ).ready(async function() {
             cur = cur.parentElement
           }
         } else {
-          moulinettePreview(data.id)
+          if(data.id) {
+            moulinettePreview(data.id)
+          }
         }
 
       }
@@ -415,4 +429,5 @@ $( document ).ready(async function() {
     })
 
   }, 500);
+
 });

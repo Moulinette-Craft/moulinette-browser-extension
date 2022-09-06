@@ -11,7 +11,7 @@ class MoulinettePatreon {
    * Returns the current user session ID
    */
   async getSessionId() {
-    const data = await chrome.storage.local.get("sessionId")
+    const data = await (browser ? browser : chrome).storage.local.get("sessionId")
     return data && data.sessionId ? data.sessionId : null
   }
 
@@ -22,8 +22,8 @@ class MoulinettePatreon {
   async getAuthenticationURL() {
     // generate new GUID and store it
     const newGUID = "C" + MoulinetteUtil.generateGUID(25);
-    await chrome.storage.local.set({ sessionId : newGUID })
-    await chrome.storage.local.remove("patronUser")
+    await (browser ? browser : chrome).storage.local.set({ sessionId : newGUID })
+    await (browser ? browser : chrome).storage.local.remove("patronUser")
     const callback = `${MoulinettePatreon.SERVER_URL}/patreon/callback`
     return `https://www.patreon.com/oauth2/authorize?response_type=code&client_id=${MoulinettePatreon.CLIENT_ID}&redirect_uri=${callback}&scope=identity+identity.memberships&state=${newGUID}`
   }
@@ -36,12 +36,14 @@ class MoulinettePatreon {
     //await chrome.storage.local.remove("patronUser")
     //await chrome.storage.local.set({ sessionId: "cv5bl1p0bzpwh0dk2hm7vor3vy" })
 
-    const user = await chrome.storage.local.get("patronUser")
-    const data = await chrome.storage.local.get("sessionId")
+    const user = await (browser ? browser : chrome).storage.local.get("patronUser")
+    const data = await (browser ? browser : chrome).storage.local.get("sessionId")
 
     if(user && user.patronUser) {
       return user.patronUser;
     }
+
+    if(!data) return null;
 
     const noCache = "?ms=" + new Date().getTime()
     const results = await fetch(`${MoulinettePatreon.SERVER_URL}/user/${data.sessionId}${noCache}`).catch(function(e) {
@@ -52,10 +54,10 @@ class MoulinettePatreon {
 
     if(results && results.status == 200) {
       const user = await results.json()
-      await chrome.storage.local.set({ patronUser : user })
+      await (browser ? browser : chrome).storage.local.set({ patronUser : user })
       // GUID has been updated (after 24 hours, for security reasons)
       if(user.guid) {
-        await chrome.storage.local.set({ sessionId : user.guid })
+        await (browser ? browser : chrome).storage.local.set({ sessionId : user.guid })
         delete user.guid
       }
       return user
@@ -72,6 +74,7 @@ class MoulinettePatreon {
     if(!sessionId) {
       return false;
     }
+    console.log(sessionId)
     const results = await fetch(`${MoulinettePatreon.SERVER_URL}/user/${sessionId}/ready`).catch(function(e) {
       console.log(`MoulinetteSearch | Something went wrong while checking session readiness`)
       console.warn(e)
