@@ -18,26 +18,26 @@ async function toggleMoulinettePanel() {
 }
 
 // default (firefox and others)
-//if(typeof browser !== "undefined") {
-(typeof browser !== "undefined" ? browser : chrome).browserAction.onClicked.addListener(toggleMoulinettePanel);
-(typeof browser !== "undefined" ? browser : chrome).commands.onCommand.addListener((command) => {
-  if (command === "toggle-panel") {
-    toggleMoulinettePanel()
-  }
-});
-
-//}
+if(typeof browser !== "undefined") {
+  browser.browserAction.onClicked.addListener(toggleMoulinettePanel);
+  browser.commands.onCommand.addListener((command) => {
+    if (command === "toggle-panel") {
+      toggleMoulinettePanel()
+    }
+  });
+}
 // chrome specific (manifest v3)
-/*
 else {
   chrome.action.onClicked.addListener((tab) => {
     chrome.scripting.executeScript({
       target: {tabId: tab.id},
       func: () => {
-        toggleMoulinettePanel();
+        const panel = document.getElementById("moulinette-panel")
+        panel.style.display = (panel.style.display == 'none') ? 'block' : 'none';
+        document.getElementById("mtteSearch").focus()
       },
     });
   });
 }
-*/
+
 
