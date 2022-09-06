@@ -64,6 +64,12 @@
       ],
       "css": [ "css/moulinette.css" ]
     }
+  ],
+
+  "web_accessible_resources": [
+    "html/moulinette-panel.html",
+    "html/moulinette-drop.html",
+    "html/moulinette-preview.html"
   ]
 
 }
