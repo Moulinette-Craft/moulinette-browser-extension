@@ -2,7 +2,7 @@
 /**
  * Request for toggling right panel
  */
-browser.runtime.onMessage.addListener((request) => {
+(typeof browser !== "undefined" ? browser : chrome).runtime.onMessage.addListener((request) => {
   if(request.action === "togglePanel") {
     const panel = document.getElementById("moulinette-panel")
     panel.style.display = (panel.style.display == 'none') ? 'block' : 'none';
@@ -376,13 +376,14 @@ $( document ).ready(async function() {
         const filename = data.name + (data.name.endsWith(".webp") ? "" : ".webp")
         const file = data.url ? await client.downloadImage(data.url, filename) : await client.downloadImageByIdName(data.id, filename)
         if(file) {
-          const dataTransfer = new DataTransfer();
+          const dataTransfer = typeof browser !== "undefined" ? new window.wrappedJSObject.DataTransfer() : new DataTransfer();
           dataTransfer.items.add(file);
           const event = new DragEvent('drop', {
             dataTransfer: dataTransfer,
             clientX: e.originalEvent.clientX,
             clientY: e.originalEvent.clientY
           });
+
           // dispatch events
           let cur = document.elementFromPoint(e.originalEvent.clientX, e.originalEvent.clientY)
           while(cur) {

@@ -1,7 +1,7 @@
 const moulinette = document.getElementById("moulinette")
 if(!moulinette) {
   $.ajax({
-      url: chrome.runtime.getURL("html/moulinette-panel.html"),
+      url: (typeof browser !== "undefined" ? browser : chrome).runtime.getURL("html/moulinette-panel.html"),
       cache: false
   }).done(function(data) {
     const panel = document.createElement('div');
@@ -11,7 +11,7 @@ if(!moulinette) {
     $(panel).html(data);
   });
   $.ajax({
-      url: chrome.runtime.getURL("html/moulinette-drop.html"),
+      url: (typeof browser !== "undefined" ? browser : chrome).runtime.getURL("html/moulinette-drop.html"),
       cache: false
   }).done(function(data) {
     const dropzone = document.createElement('div');
@@ -20,7 +20,7 @@ if(!moulinette) {
     $(dropzone).html(data);
   });
   $.ajax({
-      url: chrome.runtime.getURL("html/moulinette-preview.html"),
+      url: (typeof browser !== "undefined" ? browser : chrome).runtime.getURL("html/moulinette-preview.html"),
       cache: false
   }).done(function(data) {
     const dropzone = document.createElement('div');

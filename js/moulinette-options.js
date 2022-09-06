@@ -22,8 +22,8 @@ $( document ).ready(async function() {
 
     // code for disconnect button
     $("#mttePatreonDisconnect").click( async function(ev) {
-      await (browser ? browser : chrome).storage.local.remove("sessionId")
-      await (browser ? browser : chrome).storage.local.remove("patronUser")
+      await (typeof browser !== "undefined" ? browser : chrome).storage.local.remove("sessionId")
+      await (typeof browser !== "undefined" ? browser : chrome).storage.local.remove("patronUser")
       location.reload()
     })
   } else {
