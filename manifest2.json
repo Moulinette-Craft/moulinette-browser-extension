@@ -1,0 +1,75 @@
+{
+
+  "manifest_version": 2,
+  "name": "Moulinette",
+  "version": "1.0.0",
+  "description": "Web-browser client for the Moulinette Cloud service. Search and Browse assets from the creators you support on Patreon.",
+
+  "icons": {
+    "48": "icons/moulinette-48.png",
+    "96": "icons/moulinette-96.png"
+  },
+
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "webRequest",
+    "storage",
+    "https://assets.moulinette.cloud/*",
+    "https://mttecloudstorage.blob.core.windows.net/*",
+    "https://mttecloudstorage.blob.core.windows.net/*",
+    "https://moulinette.ent.westus2.azure.elastic-cloud.com/*"
+  ],
+
+  "browser_action": {
+    "default_icon": {
+      "48": "icons/moulinette-48.png",
+      "96": "icons/moulinette-96.png"
+    },
+    "default_title": "Show/hide Moulinette UI"
+  },
+
+  "background": {
+    "scripts": ["moulinette.js"]
+  },
+
+  "options_ui": {
+    "page": "html/options.html",
+    "open_in_tab": false
+  },
+
+  "commands": {
+    "toggle-panel": {
+      "suggested_key": {
+        "default": "Alt+Shift+L"
+      },
+      "description": "Show/hide Moulinette UI"
+    }
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*/*",
+        "http://*/*"
+      ],
+      "js": [
+        "js/jquery-3.6.1.min.js",
+        "js/elastic_app_search.umd.js",
+        "js/moulinette-search.js",
+        "js/moulinette-util.js",
+        "js/moulinette-patreon.js",
+        "js/moulinette-init.js",
+        "js/moulinette.js"
+      ],
+      "css": [ "css/moulinette.css" ]
+    }
+  ],
+
+  "web_accessible_resources": [
+    "html/moulinette-panel.html",
+    "html/moulinette-drop.html",
+    "html/moulinette-preview.html"
+  ]
+
+}
