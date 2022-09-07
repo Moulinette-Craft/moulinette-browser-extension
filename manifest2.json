@@ -2,7 +2,7 @@
 
   "manifest_version": 2,
   "name": "Moulinette",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Web-browser client for the Moulinette Cloud service. Search and Browse assets from the creators you support on Patreon.",
 
   "icons": {
