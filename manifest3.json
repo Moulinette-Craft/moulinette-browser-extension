@@ -13,7 +13,6 @@
   "permissions": [
     "activeTab",
     "scripting",
-    "webRequest",
     "storage"
   ],
 

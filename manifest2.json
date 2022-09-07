@@ -13,7 +13,6 @@
   "permissions": [
     "activeTab",
     "scripting",
-    "webRequest",
     "storage",
     "https://assets.moulinette.cloud/*",
     "https://mttecloudstorage.blob.core.windows.net/*",
