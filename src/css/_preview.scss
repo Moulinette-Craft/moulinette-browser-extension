@@ -1,0 +1,51 @@
+#moulinette-preview {
+  
+  z-index: 8000000000000000000;
+  background-color: #DFDDD1;
+  border: 2px solid #543c24;
+  width: 350px;
+  height: 500px;
+  padding: 20px;
+
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  margin: 0px 0 0 -170px;
+
+  display: none;
+
+  .mtteTitle {
+    font-weight: bold;
+    line-height: 1.1;
+    height: 30px;
+  }
+
+  .mtteImgPreview {
+    width: 300px;
+    height: 300px;
+    object-fit: contain;
+  }
+
+  img {
+    margin: 10px 0px;
+    max-height: 300px;
+  }
+
+  .mtteInfo {
+    font-size: 14px;
+    margin: 0px;
+    padding: 0px;
+    line-height: 1;
+  }
+
+  .mtteAbout {
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+
+  .mtteClose {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+  }
+}

@@ -1,0 +1,35 @@
+#mtteAssets {
+  position: fixed;
+  right: 5px;
+  top: 120px;
+  bottom: 35px;
+  width: 390px;
+
+  overflow-x: "hidden";
+  overflow-y: auto;
+
+  .tilefolder {
+    background-image: url("https://assets.moulinette.cloud/static/images/package.svg");
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: 12px;
+    padding-left: 18px;
+    font-size: 18px;
+    border-bottom: 1px solid #bbb;
+    line-height: 1;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    cursor: pointer;
+  }
+
+  .mtteAsset {
+    display: inline-flex;
+    width: 70px;
+    height: 70px;
+    cursor: grab;
+    background-position: center;
+    background-size: 70px;
+    background-repeat: no-repeat;
+    margin: 2px;
+  }
+}
