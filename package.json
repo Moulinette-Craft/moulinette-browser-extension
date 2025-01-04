@@ -1,0 +1,41 @@
+{
+  "name": "moulinette-extension",
+  "version": "2.0.0",
+  "description": "The Moulinette extension allows you to search for content for your TTRPG (tabletop role-playing games) sessions, such as maps, tokens, or simply images.",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "build": "tsc && vite build && sass --no-source-map --style=compressed src/css:dist/css",
+    "watch": "tsc && vite build --watch",
+    "sass-dev": "sass --watch --update --style=expanded src/css:dist/css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SvenWerlen/moulinette-browser-extension.git"
+  },
+  "keywords": [
+    "ttrpg",
+    "vtt",
+    "images",
+    "maps",
+    "tokens"
+  ],
+  "author": "Moulinette",
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "bugs": {
+    "url": "https://github.com/SvenWerlen/moulinette-browser-extension/issues"
+  },
+  "type": "module",
+  "homepage": "https://github.com/SvenWerlen/moulinette-browser-extension#readme",
+  "dependencies": {
+    "rollup-plugin-copy": "^3.5.0",
+    "rollup-plugin-scss": "^4.0.1",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7",
+    "watch": "^1.0.2"
+  },
+  "devDependencies": {
+    "@types/jquery": "^3.5.32",
+    "sass": "^1.83.0"
+  }
+}
