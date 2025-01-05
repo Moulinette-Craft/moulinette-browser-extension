@@ -1,14 +1,17 @@
-declare var chrome: any;
-declare var browser: any;
+import "./moulinette-init"
 
 import { MoulinetteSearch } from "./moulinette-search";
 import { MoulinettePatreon } from "./moulinette-patreon";
+
+declare var chrome: any;
+declare var browser: any;
 
 /**
  * Request for toggling right panel
  */
 (typeof browser !== "undefined" ? browser : chrome).runtime.onMessage.addListener((request : any) => {
   if(request.action === "togglePanel") {
+    console.log("Moulinette | Toggling Moulinette panel")
     const panel = document.getElementById("moulinette-panel")
     if(panel) {
       panel.style.display = (panel.style.display == 'none') ? 'block' : 'none';
@@ -18,16 +21,23 @@ import { MoulinettePatreon } from "./moulinette-patreon";
   return Promise.resolve({ response: "Done" });
 });
 
+export interface MoulinetteState {
+  tab: string,
+  previews: { [key: string]: string },
+  assetsCount: number,
+  curPage: number,
+  ignoreScroll?: boolean
+}
+
 
 $(async function() {
-  console.log("INITIALIZATION")
-
   // for some reasons, the moulinette part is getting added sometimes after the ready
   setTimeout(function() {
     console.log("Moulinette | Initializing Moulinette panel")
 
-    const moulinette : any = { tab: "search" }
+    const moulinetteState : MoulinetteState = { tab: "search", previews: {}, assetsCount: 0, curPage: 0, ignoreScroll: false }
     const NO_RESULT = `<div class="mtteWarning">No result. Try with other search terms.</div>`
+    NO_RESULT
 
     /**
      * Bring focus to search field
@@ -48,7 +58,7 @@ $(async function() {
      *  - if id is provided => searched
      *  - otherwise => browsed
      */
-    async function moulinettePreview(id : string | null, creatorId : string, packId : string, assetPath : string) {
+    async function moulinettePreview(id : string, previewUrl : string) {
       // clear UI
       moulinettePreviewClear()
       $("#moulinette-preview").show()
@@ -66,38 +76,32 @@ $(async function() {
       let url : string | null = ""
 
       if(id) {
-        const doc = await client.getDocument(id)
-        if(doc) {
-          const data = await client.getPackDetails(doc.publisher, doc.pack)
-          url = await client.getImageURL(id)
+        
+        const asset = await client.getAssetDetails(id)
+        console.log(asset)
+        if(asset) {
+          url = null
           $("#moulinette-preview .mtteImgPreview").css("width", url ? "300" : "100");
           $("#moulinette-preview .mtteImgPreview").css("height", url ? "300" : "100");
           if(!url) {
-            url = `${MoulinetteSearch.THUMB_BASEURL}/${doc.base}/${doc.path}_thumb.webp`
+            url = previewUrl
           }
-          const patreonURL = data ? data.publisherUrl : null
-          let tierList = data ? data.tiers.map((t : any) => t.title) : null
-          if(doc.perm.includes(0)) {
+          let tierList = asset.perms ? asset.perms.map((t) => t.title) : null
+          if(asset.perms?.find((t) => t.id == "0")) {
             tierList = ["- (Free)"]
           }
 
-          title = doc.name.split("/").pop()
-          creator = patreonURL ? `<a href="${data.publisherUrl}" target="_blank">${doc.publisher}</a>` : doc.publisher
-          pack = doc.pack
-          tiers = tierList ? tierList.join(", ") : "???"
+          title = asset.name
+          creator = `<a href="${asset.creatorUrl}" target="_blank">${asset.creator || "Unkown"}</a>`
+          pack = asset.pack || "Unkown"
+          if(tierList) {
+            tiers = "<ul>"
+            for(const t of tierList) {
+              tiers += `<li>${t}</li>`
+            }
+            tiers += "</ul>"
+          }
         }
-      }
-      else {
-        $("#moulinette-preview .mtteImgPreview").css("width", "300");
-        $("#moulinette-preview .mtteImgPreview").css("height", "300");
-        // retrieve pack
-        const bCreator = moulinette.assets[creatorId]
-        const bPack = bCreator.packs.find((p : any) => p.id == packId)
-        url = `${bPack.path}/${assetPath}?${bPack.sas ? bPack.sas : ""}`
-        title = assetPath.split("/").pop() || "???"
-        creator = creatorId
-        pack = bPack.name
-        tiers = "???"
       }
 
       $("#moulinette-preview .mtteImgPreview").attr("src",url);
@@ -122,26 +126,33 @@ $(async function() {
     /**
      * Utility function for moulinette search
      */
-    async function moulinetteSearch(terms : string, page = 1, allCreators = false) {
+    async function moulinetteSearch(terms : string, page = 0, allCreators = false) {
       const patreon = new MoulinettePatreon()
       const user = await patreon.getPatronUser()
       const client = await MoulinetteSearch.getUniqueInstance()
-      if(terms && terms.length >= 3) {
-        const results = await client.search(terms, page, allCreators ? null : user.pledges)
+      if(terms && terms.length >= 3 && page >= 0) {
+        const results = await client.searchAssets(terms, page, allCreators ? null : user.pledges)
         // exception handling
-        if(typeof results === 'string' || results instanceof String) {
-          $("#mtteAssets").html(`<div class="mtteWarning">${results}</div>`);
+        if(!results) {
           return;
         }
+        // update current page according to results        
+        moulinetteState.curPage = results.length == 0 || results.length < MoulinetteSearch.MAX_ASSETS ? -1 : page
+
         let resultsHTML = ""
-        moulinette.meta = results.meta
-        results.results.forEach((r : any) => {
-          resultsHTML += `<div class="mtteAsset" title="${r.name}" data-id="${r.id}" draggable="true" style="background-image: url('${encodeURI(r.url)}')"></div>`
+        results.forEach((r) => {
+          resultsHTML += `<div class="mtteAsset" title="${r.name}" data-id="${r.id}" draggable="true" style="background-image: url('${r.previewUrl ? r.previewUrl : ""}')"></div>`
         })
-        if(page == 1) {
+        if(page == 0) {
           $("#mtteAssets").html(resultsHTML)
+          moulinetteState.assetsCount = results.length
+          moulinetteState.previews = {}
         } else {
           $("#mtteAssets").append(resultsHTML)
+          moulinetteState.assetsCount += results.length
+        }
+        for(const r of results) {
+          moulinetteState.previews[r.id] = r.previewUrl ? r.previewUrl : ""
         }
 
         // listener : dragging the image
@@ -158,24 +169,24 @@ $(async function() {
         // listener : click => preview
         $('.mtteAsset').on("click", async function(ev) {
           const asset = $(ev.currentTarget)
-          moulinettePreview(asset.data("id"), "", "", "")
+          moulinettePreview(asset.data("id"), moulinetteState.previews[asset.data("id")])
         });
 
         $('.mtteAsset').on("mousedown", async function(ev) {
           if (ev.which === 3) {
             const asset = $(ev.currentTarget)
-            const url = await client.getImageURL(asset.data("id"))
-            if(url) {
-              location.href = url
-            } /*else if(data.id) {
-              moulinettePreview(data.id, "", "", "")
-            }*/
+            asset;
+            //const url = await client.getImageURL(asset.data("id"))
+            //if(url) {
+            //  location.href = url
+            //} /*else if(data.id) {
+              //moulinettePreview(data.id, "", "", "")
+            //}*/
           }
         });
 
         // update counts
-        const count = moulinette.meta.current == moulinette.meta.total_pages ? moulinette.meta.total_results : moulinette.meta.size * moulinette.meta.current
-        $('#mtteStats').html(`1-${count} of ${moulinette.meta.total_results} results`)
+        $('#mtteStats').html(`1-${moulinetteState.assetsCount} results`)
       }
     }
 
@@ -183,7 +194,9 @@ $(async function() {
      * Utility function for moulinette browse
      */
     async function moulinetteFilter(terms : string, creator : string) {
-      const creators = MoulinetteSearch.filterAssets(moulinette.assets, creator, terms)
+      terms; creator;
+      /*
+      const creators = MoulinetteSearch.filterAssets(moulinetteState.assets, creator, terms)
 
       // list assets
       let resultsHTML = ""
@@ -200,7 +213,7 @@ $(async function() {
       Object.keys(creators).forEach(c => count += creators[c].count)
       $('#mtteStats').html(`${count} results`)
 
-      /* Expand folder */
+      /* Expand folder 
       $("#mtteAssets .tilefolder").on("click", e => {
         const creator = $(e.currentTarget).data('creator')
         const pack = parseInt($(e.currentTarget).data('pack'))
@@ -227,7 +240,7 @@ $(async function() {
               changeDropZoneVisibility(true)
               const folder = $(ev.currentTarget).prevAll(".tilefolder:first");
               const assetPath = $(ev.currentTarget).attr("title")
-              const bCreator = moulinette.assets[folder.data("creator")]
+              const bCreator = moulinetteState.assets[folder.data("creator")]
               const bPack = bCreator.packs.find((p:any) => p.id == folder.data("pack"))
 
               ev.originalEvent?.dataTransfer?.setData("Moulinette", JSON.stringify({
@@ -247,7 +260,7 @@ $(async function() {
               if (ev.which === 3) {
                 const folder = $(ev.currentTarget).prevAll(".tilefolder:first");
                 const assetPath = $(ev.currentTarget).attr("title")
-                const bCreator = moulinette.assets[folder.data("creator")]
+                const bCreator = moulinetteState.assets[folder.data("creator")]
                 const bPack = bCreator.packs.find((p:any) => p.id == folder.data("pack"))
                 location.href = `${bPack.path}/${assetPath}?${bPack.sas ? bPack.sas : ""}`
               }
@@ -256,6 +269,7 @@ $(async function() {
         }
         $(e.currentTarget).addClass('mtteLoaded')
       })
+        */
     }
 
 
@@ -276,17 +290,18 @@ $(async function() {
      * Trigger search when checkbox is clicked
      */
     $("#mtteAll").on("change", function() {
-      moulinetteSearch($("#mtteSearch").val() as string, 1, $("#mtteAll").prop('checked'))
+      moulinetteSearch($("#mtteSearch").val() as string, 0, $("#mtteAll").prop('checked'))
     })
 
     /**
      * Execute search
      */
     $("#mtteSearch").on("keyup", async function(e) {
-      if(e.keyCode == 13) {
-        if(moulinette.tab === "search") {
-          moulinetteSearch($("#mtteSearch").val() as string, 1, $("#mtteAll").prop('checked'))
-        } else if(moulinette.tab === "browse") {
+      if(e.code == 'Enter') {
+        $("#mtteAssets").scrollTop(0);
+        if(moulinetteState.tab === "search") {
+          moulinetteSearch($("#mtteSearch").val() as string, 0, $("#mtteAll").prop('checked'))
+        } else if(moulinetteState.tab === "browse") {
           moulinetteFilter($("#mtteSearch").val() as string, $('#mtteCreators').find(":selected").val() as string)
         }
       }
@@ -299,34 +314,37 @@ $(async function() {
       if(e.currentTarget.classList.contains("active")) {
         return
       } else if(e.currentTarget.classList.contains("mtteBrowse")) {
-        moulinette.tab = "browse"
+        moulinetteState.tab = "browse"
         // adapt UI
         $(".mtteAll").hide()                              // hide "All creators" checkbox (for search)
         $("#mtteSearch").addClass("small")                // make search bar smaller
         $("#mtteCreators").css("display", "inline-block") // show filters (list of creators)
         $("#mtteCreators").html("<option>Loading...</option>")
         const client = await MoulinetteSearch.getUniqueInstance()
-        if(!moulinette.assets) {
+        client;
+        /*
+        if(!moulinetteState.assets) {
           console.log("Moulinette | Downloading asset list from server...")
-          moulinette.assets = await client.getAssetsByCreator()
+          //moulinetteState.assets = await client.getAssetsByCreator()
         }
         // update list of filters
-        const creators = Object.keys(moulinette.assets).sort(function (a, b) {
+        const creators = Object.keys(moulinetteState.assets).sort(function (a, b) {
           return a.toLowerCase().localeCompare(b.toLowerCase());
         });
         const options = creators.map(c => `<option value="${c}">${c}</option>`)
         $("#mtteCreators").html("<option value=\"\">-- All creators --</option>" + options)
+        */
         moulinetteFilter($("#mtteSearch").val() as string, $('#mtteCreators').find(":selected").val() as string)
 
 
       } else if(e.currentTarget.classList.contains("mtteSearch")) {
-        moulinette.tab = "search"
+        moulinetteState.tab = "search"
         // adapt UI
         $("#mtteCreators").hide()             // hide filters (list of creators)
         $("#mtteSearch").removeClass("small") // make search bar default size
         $(".mtteAll").show()                  // show "All creators" checkbox (for search)
         $("#mtteAssets").html("")
-        moulinetteSearch($("#mtteSearch").val() as string, 1, $("#mtteAll").prop('checked'))
+        moulinetteSearch($("#mtteSearch").val() as string, 0, $("#mtteAll").prop('checked'))
       }
 
       // highlight tab
@@ -337,17 +355,17 @@ $(async function() {
     /**
      * Scroll event
      */
-    $("#mtteAssets").scroll(async function(event) {
-      if(moulinette.tab == "browse") return;
-      if(moulinette.ignoreScroll) return;
+    $("#mtteAssets").on("scroll", async function(event) {
+      if(moulinetteState.tab == "browse") return;
+      if(moulinetteState.ignoreScroll) return;
       const bottom = $(event.currentTarget).prop("scrollHeight") - ($(event.currentTarget).scrollTop() || 0)
       const height = $(event.currentTarget).height() || 0;
       //if(!this.searchResults) return;
       if(bottom - 20 < height) {
-        if(moulinette.meta.current < moulinette.meta.total_pages) {
-          moulinette.ignoreScroll = true // avoid multiple events to occur while scrolling
-          await moulinetteSearch($("#mtteSearch").val() as string, moulinette.meta.current+1)
-          moulinette.ignoreScroll = false
+        if(moulinetteState.curPage >= 0) {
+          moulinetteState.ignoreScroll = true // avoid multiple events to occur while scrolling
+          await moulinetteSearch($("#mtteSearch").val() as string, moulinetteState.curPage+1)
+          moulinetteState.ignoreScroll = false
         }
       }
     });
@@ -383,10 +401,10 @@ $(async function() {
       let data = e.originalEvent?.dataTransfer?.getData("Moulinette");
       if(data) {
         let jsonData = JSON.parse(data) as any
-        
+        console.log(jsonData)
         // download the image from server
         const filename = jsonData.name + (jsonData.name.endsWith(".webp") ? "" : ".webp")
-        const file = jsonData.url ? await client.downloadImage(jsonData.url, filename) : await client.downloadImageByIdName(jsonData.id, filename)
+        const file = await client.downloadImageByIdName(jsonData.id, filename)
         if(file) {
           const dataTransfer = typeof browser !== "undefined" ? new (window as any).wrappedJSObject.DataTransfer() : new DataTransfer();
           dataTransfer.items.add(file);
@@ -404,7 +422,7 @@ $(async function() {
           }
         } else {
           if(jsonData.id) {
-            moulinettePreview(jsonData.id, "", "", "")
+            moulinettePreview(jsonData.id,  moulinetteState.previews[jsonData.id])
           }
         }
 
@@ -428,14 +446,23 @@ $(async function() {
     $("#moulinette-panel .mtteActions").on('drop', async function(ev) {
       changeDropZoneVisibility(false)
       const client = await MoulinetteSearch.getUniqueInstance()
+      client;
       let data = ev.originalEvent?.dataTransfer?.getData("Moulinette");
       if(data) {
         let jsonData = JSON.parse(data)
-        const url = jsonData.url ? jsonData.url : await client.getImageURL(jsonData.id)
-        if(url) {
-          location.href = url
-        } else if(jsonData.id) {
-          moulinettePreview(jsonData.id, "", "", "")
+        const assetFile = await client.downloadImageByIdName(jsonData.id, jsonData.name)
+        if(!assetFile) {
+          moulinettePreview(jsonData.id,  moulinetteState.previews[jsonData.id])
+        } else {
+          // dynamically generates a download
+          const fileURL = URL.createObjectURL(assetFile);
+          const link = document.createElement('a');
+          link.href = fileURL;
+          link.download = assetFile.name;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(fileURL);
         }
       }
       return false

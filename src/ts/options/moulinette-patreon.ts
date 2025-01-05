@@ -1,10 +1,14 @@
+/**
+ * This is a COPY of moulinette-patreon.ts
+ * (to avoid that Vite generates assets for sharing this file)
+ */
 declare var chrome: any;
 declare var browser: any;
 
 export class MoulinettePatreon {
 
-  //static SERVER_URL = "https://127.0.0.1:5000"
-  static SERVER_URL = "http://assets.moulinette.cloud"
+  //static SERVER_URL = "http://127.0.0.1:5000"
+  static SERVER_URL = "https://assets.moulinette.cloud"
 
   // client ID for FVTT integration
   static CLIENT_ID = "K3ofcL8XyaObRrO_5VPuzXEPnOVCIW3fbLIt6Vygt_YIM6IKxA404ZQ0pZbZ0VkB"
@@ -43,9 +47,10 @@ export class MoulinettePatreon {
     const user = await (typeof browser !== "undefined" ? browser : chrome).storage.local.get("patronUser")
     const data = await (typeof browser !== "undefined" ? browser : chrome).storage.local.get("sessionId")
 
-    if(user && user.patronUser) {
-      return user.patronUser;
-    }
+    user;
+    //if(user && user.patronUser) {
+    //  return user.patronUser;
+    //}
 
     if(!data) return null;
 
@@ -103,5 +108,4 @@ export class MoulinettePatreon {
     }
     return result;
   }
-
 }

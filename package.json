@@ -7,6 +7,7 @@
   "scripts": {
     "build": "tsc && vite build && sass --no-source-map --style=compressed src/css:dist/css",
     "watch": "tsc && vite build --watch",
+    "watch:build": "tsc --watch",
     "sass-dev": "sass --watch --update --style=expanded src/css:dist/css"
   },
   "repository": {

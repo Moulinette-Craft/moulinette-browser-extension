@@ -4,10 +4,16 @@ import { defineConfig } from "vite";
 export default defineConfig({
   build: {
     sourcemap: true,
+    minify: false,
+    terserOptions: {
+      compress: false,
+      mangle: false,
+    },
     rollupOptions: {
       input: {
         "background": "src/ts/background.ts",
-        "moulinette": "src/ts/moulinette.ts"
+        "moulinette": "src/ts/moulinette.ts",
+        "options": "src/ts/options/moulinette-options.ts"
       },
       // we build a single file with vite
       output: {

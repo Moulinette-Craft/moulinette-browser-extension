@@ -21,6 +21,7 @@ $.ajax({
   const existingDropzone = document.getElementById("moulinette-drop");
   if (!existingDropzone) {
     const dropzone = document.createElement('div');
+    //dropzone.style.display = "none"
     dropzone.id = "moulinette-drop"
     document.body.appendChild(dropzone);
     $(dropzone).html(data);
@@ -32,9 +33,10 @@ $.ajax({
 }).done(function(data) {
   const existingPreview = document.getElementById("moulinette-preview");
   if (!existingPreview) {
-    const dropzone = document.createElement('div');
-    dropzone.id = "moulinette-preview"
-    document.body.appendChild(dropzone);
-    $(dropzone).html(data);
+    const preview = document.createElement('div');
+    //preview.style.display = "none"
+    preview.id = "moulinette-preview"
+    document.body.appendChild(preview);
+    $(preview).html(data);
   }
 });

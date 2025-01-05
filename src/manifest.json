@@ -1,0 +1,69 @@
+{
+
+  "manifest_version": 2,
+  "name": "Moulinette TTRPG Media Search",
+  "version": "2.0.0",
+  "description": "Web-browser client for the Moulinette Cloud service. Search and Browse assets from the creators you support on Patreon.",
+
+  "icons": {
+    "48": "icons/moulinette-48.png",
+    "96": "icons/moulinette-96.png"
+  },
+
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "https://assets.moulinette.cloud/*",
+    "https://assets-dev.moulinette.cloud/*",
+    "https://mttecloudstorage.blob.core.windows.net/*",
+    "https://mttestorage.blob.core.windows.net/*"
+  ],
+
+  "browser_action": {
+    "default_icon": {
+      "48": "icons/moulinette-48.png",
+      "96": "icons/moulinette-96.png"
+    },
+    "default_title": "Show/hide Moulinette UI"
+  },
+
+  "background": {
+    "scripts": ["js/background.js"]
+  },
+
+  "options_ui": {
+    "page": "html/options.html",
+    "open_in_tab": false
+  },
+
+  "commands": {
+    "toggle-panel": {
+      "suggested_key": {
+        "default": "Alt+Shift+L"
+      },
+      "description": "Show/hide Moulinette UI"
+    }
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*/*",
+        "http://*/*"
+      ],
+      "js": [
+        "js/jquery-3.7.1.min.js",
+        "js/moulinette.js"
+      ],
+      "css": [ "css/style.css" ]
+    }
+  ],
+
+  "web_accessible_resources": [
+    "html/moulinette-panel.html",
+    "html/moulinette-drop.html",
+    "html/moulinette-preview.html"
+  ]
+
+}

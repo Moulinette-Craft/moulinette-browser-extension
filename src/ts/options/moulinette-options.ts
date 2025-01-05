@@ -1,5 +1,9 @@
+import { MoulinettePatreon } from "./moulinette-patreon"
 
-$( document ).ready(async function() {
+declare var chrome: any;
+declare var browser: any;
+
+$(async function() {
 
   const patreon = new MoulinettePatreon()
   const user = await patreon.getPatronUser()
@@ -21,7 +25,7 @@ $( document ).ready(async function() {
     msgBox.html(html)
 
     // code for disconnect button
-    $("#mttePatreonDisconnect").click( async function(ev) {
+    $("#mttePatreonDisconnect").on("click", async function() {
       await (typeof browser !== "undefined" ? browser : chrome).storage.local.remove("sessionId")
       await (typeof browser !== "undefined" ? browser : chrome).storage.local.remove("patronUser")
       location.reload()
@@ -31,7 +35,7 @@ $( document ).ready(async function() {
     msgBox.html(`Your Patreon account is not yet linked to Moulinette.<br/><a id="mttePatreonLink" href=${URL} target="_blank">Authenticate and autorize Moulinette</a>.`)
   }
 
-  $("#mttePatreonLink").click( ev => {
+  $("#mttePatreonLink").on("click", () => {
 
     msgBox.html("Waiting for you to authenticate on Patreon and autorize Moulinette ...")
     let timerIter = 0
