@@ -1,10 +1,14 @@
 #mtteAssets {
-  position: fixed;
-  right: 5px;
-  top: 120px;
-  bottom: 35px;
-  width: 390px;
+  position: relative;
+  display: flex;
+  justify-content: flex-start;
+  align-content: flex-start;
+  flex: 1;
+  flex-wrap: wrap;
 
+  margin-top: 10px;
+  margin-bottom: 5px;
+  
   overflow-x: "hidden";
   overflow-y: auto;
 

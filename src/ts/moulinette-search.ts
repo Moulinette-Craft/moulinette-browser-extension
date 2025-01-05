@@ -224,7 +224,6 @@ export class MoulinetteSearch {
 
   constructor(sessionId: string) {
     this.sessionId = sessionId ? sessionId : "anonymous"
-    console.log(this.sessionId)
   }
 
   /**
@@ -244,8 +243,7 @@ export class MoulinetteSearch {
   /**
    * Executes a search and returns the results
    */
-  async searchAssets(terms : string, page = 0, pledges = []) : Promise<MouCollectionCloudAsset[] | null> {
-    terms; page; pledges;
+  async searchAssets(terms : string, page = 0, allAssets = false) : Promise<MouCollectionCloudAsset[] | null> {
     if(this.pending) {
       console.warn("MoulinetteSearch | Moulinette already searching ... please wait!")
       return null
@@ -259,7 +257,7 @@ export class MoulinetteSearch {
     const filtersDuplicate : any = {}
     Object.assign(filtersDuplicate, filters);
     filtersDuplicate["page"] = page
-    filtersDuplicate["scope"] = { mode: "cloud-all", session: this.sessionId }
+    filtersDuplicate["scope"] = { mode: allAssets ? "cloud-all" : "cloud-accessible", session: this.sessionId }
     filtersDuplicate["pack"] = !("pack" in filtersDuplicate) || filtersDuplicate["pack"].length == 0 ? null : filtersDuplicate["pack"]
     
     try {
@@ -284,7 +282,6 @@ export class MoulinetteSearch {
     try {
       const response = await MoulinetteClient.get(`/asset/${id}?session=${this.sessionId}`)
       if(response && response.status == 200) {
-        console.log( response.data)
         return new MouCollectionCloudAsset(response.data)
       }
     } catch(error: any) {
@@ -307,7 +304,7 @@ export class MoulinetteSearch {
   }
 
   async downloadImage(url : string | null, name: string) : Promise<File | null> {
-    if(!url) return null
+    if(!url || !url.startsWith("https://")) return null
 
     let res = await fetch(url).catch(function(e) {
       console.warn(`MoulinetteSearch | Not able to download the image`, e)
@@ -321,7 +318,6 @@ export class MoulinetteSearch {
 
 
   async getAssetsByCreator() {
-    console.log(`${MoulinetteSearch.SERVER_URL}/assets/${this.sessionId}?client=mbe&ms=${new Date().getTime()}`)
     let res = await fetch(`${MoulinetteSearch.SERVER_URL}/assets/${this.sessionId}?client=mbe&ms=${new Date().getTime()}`).catch(function(e) {
       console.error(`Moulinette | Not able to fetch assets from Moulinette servers`)
       console.error(e)

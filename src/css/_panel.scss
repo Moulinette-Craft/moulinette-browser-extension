@@ -3,13 +3,39 @@
   font-family: Arial, Helvetica, sans-serif;
   font-size: 14px;
   position: fixed;
+  display: flex;
+  flex-direction: column;
   top: 0px;
   right: 0px;
   bottom: 0px;
   width: 400px;
+  padding-left: 5px;
   z-index: 9000000000000000000;
-  border-left: 2px solid #ddd;
   background-color: #DFDDD1;
+
+  .resize-handle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    border-right: 2px solid black;
+    background-color: #888;
+    cursor: ew-resize;
+  }
+
+  .mtteContent {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    position: relative;
+    height: 100%;
+    padding: 0px 5px;
+    
+    &.mtteBrowse {
+      display: none;
+    }
+  }
 
   img {
     color: #111;
@@ -20,9 +46,9 @@
     color: #666;
     font-size: 20px;
     font-family: Sans-serif;
-    margin-left: 42px;
-    margin-top: 8px;
-    margin-bottom: 1px;
+    margin-left: 36px;
+    margin-top: 9px;
+    margin-bottom: 10px;
     border: 0px;
   }
 
@@ -33,64 +59,24 @@
     width: 24px;
   }
 
-  .mtteActions {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    display: none;
+  .mtteSearchOptions {
+    display: flex;
+    width: 100%;
 
-    img {
-      width: 48px;
-      margin: 0px;
-      padding: 0px;
-      background:rgba(255, 255, 0, 0.3);
+    .searchbar {
+      display: flex;
+      align-items: center;
+      width: 100%;
+
+      #mtteSearch {
+        flex-grow: 1;
+      }
+
+      .mtteOptions {
+        margin-left: 5px;
+      }
+        
     }
-  }
-  
-
-  /** Force default style **/
-  .mtteContent {
-    margin-top: 10px;
-    height: 100%;
-  
-    &.mtteBrowse {
-      display: none;
-    }
-
-    input[type='text'] {
-      writing-mode: horizontal-tb !important;
-      text-rendering: auto;
-      color: fieldtext;
-      border: 0px;
-      letter-spacing: normal;
-      word-spacing: normal;
-      line-height: normal;
-      text-transform: none;
-      text-indent: 0px;
-      text-shadow: none;
-      display: inline-block;
-      text-align: start;
-      appearance: auto;
-      cursor: text;
-      background-color: field;
-      margin: 0em;
-      padding: 1px 2px;
-      border-width: 2px;
-      border-style: inset;
-      border-color: -internal-light-dark(rgb(118, 118, 118), rgb(133, 133, 133));
-      border-image: initial;
-      background-color: white;
-    }
-  }
-
-  #mtteSearch {
-    color: #111;
-    margin: 0px 10px;
-    width: 300px;
-  }
-
-  label {
-    display: inline-block;
   }
 
   .small {
@@ -124,6 +110,34 @@
     border-color: -internal-light-dark(rgb(118, 118, 118), rgb(133, 133, 133));
     border-image: initial;
     border-radius: 0px;
+  }
+
+  .mtteInstructions {
+    font-size: 12px;
+    position: relative;
+    margin: 10px;
+    padding: 5px 15px;
+    width: 300px;
+    background-color: white;
+    border: 1px solid #444;
+  }
+
+  .mtteFooter {
+    display: flex;
+    height: 20px;
+
+    #mtteLinks
+    {
+      flex-grow: 1;
+    }
+  }
+  
+  .mtteWarning {
+    width: 100%;
+    color: darkred;
+    padding: 3px 0px;
+    border-top: 1px dotted #555;
+    border-bottom: 1px dotted #555;
   }
 }
 

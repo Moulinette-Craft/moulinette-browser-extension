@@ -1,7 +1,6 @@
 import "./moulinette-init"
 
 import { MoulinetteSearch } from "./moulinette-search";
-import { MoulinettePatreon } from "./moulinette-patreon";
 
 declare var chrome: any;
 declare var browser: any;
@@ -36,9 +35,7 @@ $(async function() {
     console.log("Moulinette | Initializing Moulinette panel")
 
     const moulinetteState : MoulinetteState = { tab: "search", previews: {}, assetsCount: 0, curPage: 0, ignoreScroll: false }
-    const NO_RESULT = `<div class="mtteWarning">No result. Try with other search terms.</div>`
-    NO_RESULT
-
+    
     /**
      * Bring focus to search field
      */
@@ -64,11 +61,8 @@ $(async function() {
       $("#moulinette-preview").show()
 
       // load data
-      const patreon = new MoulinettePatreon()
-      const user = await patreon.getPatronUser()
       const client = await MoulinetteSearch.getUniqueInstance()
-      user;
-
+      
       let title   = "???"
       let creator = "???"
       let pack    = "???"
@@ -127,11 +121,9 @@ $(async function() {
      * Utility function for moulinette search
      */
     async function moulinetteSearch(terms : string, page = 0, allCreators = false) {
-      const patreon = new MoulinettePatreon()
-      const user = await patreon.getPatronUser()
       const client = await MoulinetteSearch.getUniqueInstance()
       if(terms && terms.length >= 3 && page >= 0) {
-        const results = await client.searchAssets(terms, page, allCreators ? null : user.pledges)
+        const results = await client.searchAssets(terms, page, allCreators)
         // exception handling
         if(!results) {
           return;
@@ -139,9 +131,14 @@ $(async function() {
         // update current page according to results        
         moulinetteState.curPage = results.length == 0 || results.length < MoulinetteSearch.MAX_ASSETS ? -1 : page
 
+        if(results.length == 0 && page == 0) {    
+          $("#mtteAssets").html(`<div class="mtteWarning">No result. ${allCreators ? "" : "Check \"all\" to see assets from all creators."}</div>`)
+          return
+        }
+
         let resultsHTML = ""
         results.forEach((r) => {
-          resultsHTML += `<div class="mtteAsset" title="${r.name}" data-id="${r.id}" draggable="true" style="background-image: url('${r.previewUrl ? r.previewUrl : ""}')"></div>`
+          resultsHTML += `<div class="mtteAsset" title="${r.name}" data-id="${r.id}" draggable="true" style="background-image: url('${r.previewUrl ? r.previewUrl.replace(/'/g, "\\'") : ""}')"></div>`
         })
         if(page == 0) {
           $("#mtteAssets").html(resultsHTML)
@@ -172,16 +169,32 @@ $(async function() {
           moulinettePreview(asset.data("id"), moulinetteState.previews[asset.data("id")])
         });
 
+        // block default browser context menu
+        $('.mtteAsset').on("contextmenu", function() {
+          return false;
+        });
+
         $('.mtteAsset').on("mousedown", async function(ev) {
           if (ev.which === 3) {
+            ev.preventDefault()
+            ev.stopPropagation();
             const asset = $(ev.currentTarget)
-            asset;
-            //const url = await client.getImageURL(asset.data("id"))
-            //if(url) {
-            //  location.href = url
-            //} /*else if(data.id) {
-              //moulinettePreview(data.id, "", "", "")
-            //}*/
+            const client = await MoulinetteSearch.getUniqueInstance()
+            const assetId = asset.data("id")
+            const assetFile = await client.downloadImageByIdName(assetId, asset.attr("title")!.split("/").pop()!)
+            if(!assetFile) {
+              moulinettePreview(assetId,  moulinetteState.previews[assetId])
+            } else {
+              // dynamically generates a download
+              const fileURL = URL.createObjectURL(assetFile);
+              const link = document.createElement('a');
+              link.href = fileURL;
+              link.download = assetFile.name;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              URL.revokeObjectURL(fileURL);
+            }
           }
         });
 
@@ -279,18 +292,18 @@ $(async function() {
     function changeDropZoneVisibility(show = true) {
       if(show) {
         $("#moulinette-drop").show()
-        $("#moulinette-panel .mtteActions").show()
       } else {
         $("#moulinette-drop").hide()
-        $("#moulinette-panel .mtteActions").hide()
       }
     }
 
     /**
      * Trigger search when checkbox is clicked
      */
-    $("#mtteAll").on("change", function() {
-      moulinetteSearch($("#mtteSearch").val() as string, 0, $("#mtteAll").prop('checked'))
+    $("#mtteAll").on("change", async function() {
+      const checked = $("#mtteAll").prop('checked')
+      await (typeof browser !== "undefined" ? browser : chrome).storage.local.set({"allAssets": checked})
+      moulinetteSearch($("#mtteSearch").val() as string, 0, checked)
     })
 
     /**
@@ -364,7 +377,7 @@ $(async function() {
       if(bottom - 20 < height) {
         if(moulinetteState.curPage >= 0) {
           moulinetteState.ignoreScroll = true // avoid multiple events to occur while scrolling
-          await moulinetteSearch($("#mtteSearch").val() as string, moulinetteState.curPage+1)
+          await moulinetteSearch($("#mtteSearch").val() as string, moulinetteState.curPage+1, $("#mtteAll").prop('checked'))
           moulinetteState.ignoreScroll = false
         }
       }
@@ -433,16 +446,6 @@ $(async function() {
       changeDropZoneVisibility(false)
     })
 
-    $("#moulinette-panel .mtteActions").on('dragover', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-    })
-
-    $("#moulinette-panel .mtteActions").on('dragenter', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-    })
-
     $("#moulinette-panel .mtteActions").on('drop', async function(ev) {
       changeDropZoneVisibility(false)
       const client = await MoulinetteSearch.getUniqueInstance()
@@ -466,6 +469,33 @@ $(async function() {
         }
       }
       return false
+    })
+
+    let isResizing = false;
+    const moulinettePanel = $('#moulinette-panel')
+
+    $("#moulinette-panel .resize-handle").on('mousedown', (ev) => {
+      ev.preventDefault(); 
+      isResizing = true;
+    })
+
+    document.addEventListener('mousemove', (ev) => {
+      if (!isResizing) return;
+      const newWidth = window.innerWidth - ev.clientX;
+      if(newWidth > 400) {
+        moulinettePanel.css('width', `${newWidth}px`);
+      }
+    })
+
+    document.addEventListener('mouseup', () => {
+      isResizing = false;
+    });
+
+    // initialize checkbox based on last session
+    (typeof browser !== "undefined" ? browser : chrome).storage.local.get("allAssets").then((data: any) => {
+      if(data && data.allAssets) {
+        $("#mtteAll").prop('checked', data.allAssets)
+      }
     })
 
   }, 500);
