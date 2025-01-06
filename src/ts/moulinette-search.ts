@@ -67,6 +67,7 @@ class MouCollectionCloudAsset {
   meta: MouCollectionAssetMeta[];   // asset metadata
   flags: any;                       // asset flags (e.g. is hasAudioPreview)
   perms?: MouPermissionTier[];      // asset permissions (tiers on which the asset is available)
+  deps?: string[]                    // asset dependencies
 
   // specific to MouCollectionCloud
   cloud_type: number; 
@@ -89,6 +90,10 @@ class MouCollectionCloudAsset {
       this.creatorUrl = data.creator_url
       this.pack = data.pack
       this.previewUrl = null
+    }
+
+    if(data.deps) {
+      this.deps = data.deps.map((d: string) => `${data.base_url}/${d}`);
     }
 
     // full url
@@ -208,6 +213,19 @@ class MouCollectionCloudAsset {
   }
 }
 
+
+export interface MouCollectionCreator {
+  name: string,
+  assets: number
+}
+
+export interface MouCollectionPack {
+  name: string,
+  assets: number,
+  pack_ref: string
+}
+
+
 export class MoulinetteSearch {
 
   static INSTANCE: MoulinetteSearch | null = null
@@ -240,25 +258,51 @@ export class MoulinetteSearch {
     return MoulinetteSearch.INSTANCE
   }
 
+
+  /**
+   * Retrieves the corresponding asset type ID based on the provided asset type string.
+   *
+   * @param assetType - The type of the asset as a string (e.g., "map", "sound", "pdf").
+   * @returns The corresponding `MouCollectionAssetTypeEnum` value for the given asset type.
+   *          Defaults to `MouCollectionAssetTypeEnum.Image` if the asset type is not recognized.
+   */
+  getAssetTypeId(assetType : string) : MouCollectionAssetTypeEnum {
+    switch(assetType) {
+      case "map": return MouCollectionAssetTypeEnum.Map;
+      case "sound": return MouCollectionAssetTypeEnum.Audio; 
+      case "pdf": return MouCollectionAssetTypeEnum.PDF;
+      default: return MouCollectionAssetTypeEnum.Image
+    }
+  }
+
+  getAssetTypeMime(assetType : number, ext: string) : string {
+    switch(assetType) {
+      case MouCollectionAssetTypeEnum.Audio: return `audio/${ext}`; 
+      case MouCollectionAssetTypeEnum.PDF: return "application/pdf";
+      default: return "image/webp"
+    }
+  }
+
   /**
    * Executes a search and returns the results
    */
-  async searchAssets(terms : string, page = 0, allAssets = false) : Promise<MouCollectionCloudAsset[] | null> {
+  async searchAssets(filters = { terms : "" as string, type : "" as string, creator: "" as string, pack : "" as string }, page = 0, allAssets = false) : Promise<MouCollectionCloudAsset[] | null> {
     if(this.pending) {
       console.warn("MoulinetteSearch | Moulinette already searching ... please wait!")
       return null
     }
     this.pending = true
-    let filters : MouCollectionFilters = {
-      searchTerms: terms,
-      type: 3 // = Images
+    let searchFilters : MouCollectionFilters = {
+      searchTerms: filters.terms,
+      type: this.getAssetTypeId(filters.type)
     }
     let results : MouCollectionCloudAsset[] = []
     const filtersDuplicate : any = {}
-    Object.assign(filtersDuplicate, filters);
+    Object.assign(filtersDuplicate, searchFilters);
     filtersDuplicate["page"] = page
     filtersDuplicate["scope"] = { mode: allAssets ? "cloud-all" : "cloud-accessible", session: this.sessionId }
-    filtersDuplicate["pack"] = !("pack" in filtersDuplicate) || filtersDuplicate["pack"].length == 0 ? null : filtersDuplicate["pack"]
+    filtersDuplicate["creator"] = filters.creator.length == 0 ? null : filters.creator
+    filtersDuplicate["pack"] = filters.pack.length == 0 ? null : filters.pack
     
     try {
       const response = await MoulinetteClient.post(`/assets`, filtersDuplicate)
@@ -268,10 +312,68 @@ export class MoulinetteSearch {
         }
       }
     } catch(error: any) {
-      //this.error = MouCollectionCloud.ERROR_SERVER_CNX
-      //MouApplication.logError(this.APP_NAME, `Not able to retrieve assets`, error)
+      console.error(`MoulinetteSearch | Not able to retrieve assets`, error)
     }
     this.pending = false
+    return results
+  }
+
+  async getCreators(terms: string, assetType: string, allAssets = false) : Promise<MouCollectionCreator[] | null> {
+    if(this.pending) {
+      console.warn("MoulinetteSearch | Moulinette already searching ... please wait!")
+      return null
+    }
+    let filters : MouCollectionFilters = {
+      searchTerms: terms,
+      type:  this.getAssetTypeId(assetType)
+    }
+    let results : MouCollectionCreator[] = []
+    const filtersDuplicate : any = {}
+    Object.assign(filtersDuplicate, filters);
+    filtersDuplicate["scope"] = { mode: allAssets ? "cloud-all" : "cloud-accessible", session: this.sessionId }
+    try {
+      const response = await MoulinetteClient.post(`/creators`, filtersDuplicate)
+      if(response && response.status == 200) {
+        for(const data of response.data) {
+          results.push(data)
+        }
+      }
+    } catch(error: any) {
+      console.error(`MoulinetteSearch | Not able to retrieve creators`, error)
+    }
+    this.pending = false
+    results.sort((a, b) => a.name.localeCompare(b.name))
+    return results
+  }
+
+  async getPacks(terms: string, assetType: string, creator: string, allAssets = false) : Promise<MouCollectionPack[] | null> {
+    if(this.pending) {
+      console.warn("MoulinetteSearch | Moulinette already searching ... please wait!")
+      return null
+    }
+    let filters : MouCollectionFilters = {
+      searchTerms: terms,
+      creator: creator,
+      type:  this.getAssetTypeId(assetType)
+    }
+    let results : MouCollectionPack[] = []
+    if(creator.length == 0) return results
+
+    const filtersDuplicate : any = {}
+    Object.assign(filtersDuplicate, filters);
+    filtersDuplicate["scope"] = { mode: allAssets ? "cloud-all" : "cloud-accessible", session: this.sessionId }
+    try {
+      const response = await MoulinetteClient.post(`/packs`, filtersDuplicate)
+      if(response && response.status == 200) {
+        for(const data of response.data) {
+          results.push(data)
+        }
+      }
+    } catch(error: any) {
+      console.error(`MoulinetteSearch | Not able to retrieve creators`, error)
+    }
+    this.pending = false
+    //results.sort((a, b) => a.name.localeCompare(b.name))
     return results
   }
 
@@ -286,8 +388,6 @@ export class MoulinetteSearch {
       }
     } catch(error: any) {
       console.error(`MoulinetteSearch | Not able to retrieve asset details`, error)
-      //this.error = MouCollectionCloud.ERROR_SERVER_CNX
-      //MouApplication.logError(this.APP_NAME, `Not able to retrieve assets`, error)
     }
 
     return null
@@ -297,105 +397,31 @@ export class MoulinetteSearch {
    * Downloads image matching id
    * Returns a File object with the binary file representing the image
    */
-  async downloadImageByIdName(id : string, name : string) {
+  async downloadAssetByIdName(id : string, name : string) {
     const details = await this.getAssetDetails(id)
     if(!details) return null
-    return this.downloadImage(details.url, name)
+    // special case for scenes (download first dependency (corresponds to the image))
+    if(details.type == MouCollectionAssetTypeEnum.Scene) {
+      if(details.deps && details.deps.length > 0) {
+        return this.downloadAsset(details.deps[0], MouCollectionAssetTypeEnum.Image, name)
+      } else {
+        return null;
+      }
+    }
+    return this.downloadAsset(details.url, details.type, name)
   }
 
-  async downloadImage(url : string | null, name: string) : Promise<File | null> {
+  async downloadAsset(url : string | null, assetType: number, name: string) : Promise<File | null> {
     if(!url || !url.startsWith("https://")) return null
 
     let res = await fetch(url).catch(function(e) {
-      console.warn(`MoulinetteSearch | Not able to download the image`, e)
+      console.warn(`MoulinetteSearch | Not able to download the asset`, e)
     });
     if(res) {
       const blob = await res.blob()
-      return new File([blob], name, { type: "image/webp", lastModified: new Date().getTime() })
+      const fileExt = name.split('.').pop() || ""
+      return new File([blob], name, { type: this.getAssetTypeMime(assetType, fileExt), lastModified: new Date().getTime() })
     }
     return null
-  }
-
-
-  async getAssetsByCreator() {
-    let res = await fetch(`${MoulinetteSearch.SERVER_URL}/assets/${this.sessionId}?client=mbe&ms=${new Date().getTime()}`).catch(function(e) {
-      console.error(`Moulinette | Not able to fetch assets from Moulinette servers`)
-      console.error(e)
-      return {}
-    });
-    res;
-    const creators = {}
-    /*
-    const data = await res.json()
-    // filter assets for simple images only
-    data.forEach(c => {
-      const packs = []
-      let count = 0
-      c.packs.forEach(p => {
-        const assets = p.assets.filter(a => (typeof a === 'string' || a instanceof String) && a.endsWith(".webp"))
-        if(assets.length > 0) {
-          count += assets.length
-          packs.push({
-            id: p.id,
-            name: p.name,
-            path: p.path,
-            sas: p.sas,
-            assets: assets
-          })
-        }
-      })
-      if(packs.length > 0) {
-        creators[c.publisher] = {
-          count: count,
-          packs: packs
-        }
-      }
-    })
-      */
-    return creators;
-  }
-
-  /**
-   * Utility function to filter assets
-   */
-  static filterAssets(assets : any, creator : string, terms : string) {
-    let creators : any = {}
-    const termsList = terms.toLowerCase().split(" ");
-    Object.keys(assets).forEach(c => {
-      // creator doesn't match
-      if(creator.length > 0 && c !== creator) return
-      const packs : any[] = []
-      let count = 0
-      assets[c].packs.forEach((p : any) => {
-        const assets = terms.length == 0 ? p.assets : p.assets.filter((a:any) => {
-          // must contain all terms
-          for(const t of termsList) {
-            if(!a.toLowerCase().includes(t)) {
-              return false
-            }
-          }
-          return true
-        })
-        // add pack
-        if(assets.length > 0) {
-          count += assets.length
-          packs.push({
-            id: p.id,
-            name: p.name,
-            path: p.path,
-            sas: p.sas,
-            assets: assets
-          })
-        }
-      })
-      // add creator
-      if(packs.length > 0) {
-        creators[c] = {
-          count: count,
-          packs: packs.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
-        }
-      }
-    })
-    return creators
   }
 }

@@ -1,4 +1,8 @@
+
+
 #mtteAssets {
+  --mou-asset-size: 100px;
+
   position: relative;
   display: flex;
   justify-content: flex-start;
@@ -28,11 +32,11 @@
 
   .mtteAsset {
     display: inline-flex;
-    width: 70px;
-    height: 70px;
+    width: var(--mou-asset-size);
+    height: var(--mou-asset-size);
     cursor: grab;
     background-position: center;
-    background-size: 70px;
+    background-size: var(--mou-asset-size);
     background-repeat: no-repeat;
     margin: 2px;
   }

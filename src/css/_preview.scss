@@ -1,5 +1,6 @@
 #moulinette-preview {
-  
+  all: revert;
+
   z-index: 8000000000000000000;
   background-color: #DFDDD1;
   border: 2px solid #543c24;
@@ -24,6 +25,7 @@
     width: 300px;
     height: 300px;
     object-fit: contain;
+    align-items: center;
   }
 
   img {
@@ -48,4 +50,11 @@
     right: 10px;
     bottom: 10px;
   }
+}
+
+@media (prefers-color-scheme: dark) {
+  #moulinette-preview {
+    background-color: #333;
+    border: 2px solid #888;
+  } 
 }
