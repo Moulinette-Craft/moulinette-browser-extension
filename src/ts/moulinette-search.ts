@@ -40,7 +40,7 @@ export interface MouCollectionFilters {
 }
 
 export interface MouCollectionAssetMeta {
-  icon?: string,
+  id: string,
   text: string,
   hint: string
 }
@@ -135,7 +135,7 @@ class MouCollectionCloudAsset {
       case MouCollectionAssetTypeEnum.Image:
         if(data.size) {
           this.meta.push({ 
-            icon: "fa-regular fa-expand-wide", 
+            id: "fa-regular fa-expand-wide", 
             text: `${MouMediaUtils.prettyNumber(data.size.width, true)} x ${MouMediaUtils.prettyNumber(data.size.height, true)}`,
             hint: "Image size (static or animated)"
           })
@@ -145,28 +145,30 @@ class MouCollectionCloudAsset {
         if(data.audio.duration >= 45) {
           this.flags["hasAudioPreview"] = true
           this.meta.push({ 
-            icon: "fa-solid fa-headphones", 
-            text: "",
+            id: "preview", 
+            text: "🎧",
             hint: "Preview available for that audio"
           })
+        } else {
+          this.previewUrl = null
         }
         this.meta.push({ 
-          icon: "fa-regular fa-stopwatch", 
+          id: "duration", 
           text: MouMediaUtils.prettyDuration(data.audio.duration),
-          hint: "Preview available for that audio"
+          hint: "Sound/music duration"
         })
         break
       case MouCollectionAssetTypeEnum.Scene:
         if(data.scene.width) {
           this.meta.push({ 
-            icon: "fa-regular fa-border-all", 
+            id: "dimensions", 
             text: `${data.scene.width} x ${data.scene.height}`,
             hint: "Scene dimensions (in grid units)"
           })
         } else {
           if(data.size) {
             this.meta.push({ 
-              icon: "fa-regular fa-expand-wide", 
+              id: "size", 
               text: `${MouMediaUtils.prettyNumber(data.size.width, true)} x ${MouMediaUtils.prettyNumber(data.size.height, true)}`,
               hint: "Image size (static or animated)"
             })
@@ -175,39 +177,21 @@ class MouCollectionCloudAsset {
         break
       case MouCollectionAssetTypeEnum.Map:  
         this.meta.push({ 
-          icon: "fa-regular fa-expand-wide", 
+          id: "size", 
           text: `${MouMediaUtils.prettyNumber(data.size.width, true)} x ${MouMediaUtils.prettyNumber(data.size.height, true)}`,
           hint: "Image size (static or animated)"
         })
         break
       case MouCollectionAssetTypeEnum.PDF:
         this.meta.push({ 
-          icon: "fa-regular fa-file-pdf", 
+          id: "pages", 
           text: `${data.pdf?.pages} ` + (data.pdf.pages > 1 ? "pages" : "page"),
           hint: "Number of pages in the PDF file"
         })
         break
-      case MouCollectionAssetTypeEnum.Playlist:
-        if(data.playlist?.sounds) {
-          this.meta.push({ 
-            icon: "fa-regular fa-music", 
-            text: `${data.playlist.sounds} ` + (data.playlist.sounds > 1 ? "tracks" : "track"),
-            hint: "Number of tracks in the playlist"
-          })
-        }
-        break
-      case MouCollectionAssetTypeEnum.JournalEntry:
-        if(data.journal?.pages) {
-          this.meta.push({ 
-            icon: "fa-regular fa-file-lines", 
-            text: `${data.journal.pages} ` + (data.journal.pages > 1 ? "MOU.pages" : "MOU.page"),
-            hint: "Number of pages in the journal"
-          })
-        }
-        break
     }
     this.meta.push({ 
-      icon: "fa-regular fa-weight-hanging",
+      id: "filesize",
       text: MouMediaUtils.prettyFilesize(data.filesize, 0),
       hint: "File size"})
   }

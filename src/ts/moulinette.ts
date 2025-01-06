@@ -1,6 +1,6 @@
 import "./moulinette-init"
 
-import { MoulinetteSearch } from "./moulinette-search";
+import { MouCollectionAssetTypeEnum, MoulinetteSearch } from "./moulinette-search";
 import MouMediaUtils from "./utils/media-utils";
 
 declare var chrome: any;
@@ -34,7 +34,15 @@ $(async function() {
   setTimeout(function() {
     console.log("Moulinette | Initializing Moulinette panel")
 
-    const moulinetteState : MoulinetteState = { previews: {}, assetsCount: 0, curPage: 0, ignoreScroll: false }
+    const moulinetteState : MoulinetteState = { 
+      previews: {}, 
+      assetsCount: 0, 
+      curPage: 0, 
+      ignoreScroll: false,
+    }
+
+    let previewTimeout: ReturnType<typeof setTimeout>
+    const previewSound: HTMLAudioElement = new Audio()
     
     /**
      * Bring focus to search field
@@ -67,17 +75,16 @@ $(async function() {
       let creator = "???"
       let pack    = "???"
       let tiers   = "???"
-      let url : string | null = ""
+      let url : string | null = null
 
       if(id) {
         
         const asset = await client.getAssetDetails(id)
         console.log(asset)
         if(asset) {
-          url = null
           $("#moulinette-preview .mtteImgPreview").css("width", url ? "300" : "100");
           $("#moulinette-preview .mtteImgPreview").css("height", url ? "300" : "100");
-          if(!url) {
+          if(!url && asset.type != MouCollectionAssetTypeEnum.Audio) {
             url = previewUrl
           }
           let tierList = asset.perms ? asset.perms.map((t) => t.title) : null
@@ -98,7 +105,10 @@ $(async function() {
         }
       }
 
-      $("#moulinette-preview .mtteImgPreview").attr("src",url);
+      if(url) {
+        $("#moulinette-preview .mtteImgPreview").attr("src",url);
+      }
+      
       // update image sizes
       $("#moulinette-preview .mtteImgPreview").on("load", function() {
         const image = document.querySelector("#moulinette-preview .mtteImgPreview") as HTMLImageElement;
@@ -201,7 +211,18 @@ $(async function() {
 
         let resultsHTML = ""
         results.forEach((r) => {
-          resultsHTML += `<div class="mtteAsset" title="${r.name}" data-id="${r.id}" draggable="true" style="background-image: url('${r.previewUrl ? r.previewUrl.replace(/'/g, "\\'") : ""}')"></div>`
+          switch(r.type) {
+            case MouCollectionAssetTypeEnum.Audio: 
+              const duration = r.meta.find((m) => m.id == "duration")?.text || ""
+              const hasPreview = r.meta.find((m) => m.id == "preview")?.text || ""
+              resultsHTML += `<div class="mtteAsset sound" data-id="${r.id}" data-preview="${r.previewUrl ? r.previewUrl : ''}" draggable="true">` +
+                `<div class="title">🎵 ${r.name} ${hasPreview}</div><div class="meta">${duration}</div></div>`
+              break;
+            case MouCollectionAssetTypeEnum.Image:
+            case MouCollectionAssetTypeEnum.Map:
+              resultsHTML += `<div class="mtteAsset" title="${r.name}" data-id="${r.id}" draggable="true" style="background-image: url('${r.previewUrl ? r.previewUrl.replace(/'/g, "\\'") : ""}')"></div>`
+          }
+          
         })
         if(page == 0) {
           $("#mtteAssets").html(resultsHTML)
@@ -260,6 +281,31 @@ $(async function() {
             }
           }
         });
+
+        $(".mtteAsset.sound").on("mouseenter", function(ev) {
+          previewTimeout = setTimeout(async function() {
+            ev.preventDefault()
+            ev.stopPropagation();
+            const asset = $(ev.currentTarget)
+            const client = await MoulinetteSearch.getUniqueInstance()
+            let previewUrl = asset.data("preview")
+            if(previewUrl.length == 0) {
+              const data = await client.getAssetDetails(asset.data("id"))
+              if(data && data.url && data.url.startsWith("https")) {
+                previewUrl = data.url
+              }
+            }
+            if(previewUrl) {
+              previewSound.src = previewUrl
+              previewSound.play();
+            }
+          }, 1000);
+        })
+        $(".mtteAsset.sound").on("mouseleave", function() {
+          clearTimeout(previewTimeout)
+          previewSound.pause()
+          previewSound.src = ""
+        })
 
         // update counts
         $('#mtteStats').html(`1-${moulinetteState.assetsCount} results`)
