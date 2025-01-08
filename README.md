@@ -2,7 +2,6 @@
 
 [![GitHub tags (latest by date)](https://img.shields.io/github/v/tag/SvenWerlen/moulinette-browser-extension)](https://github.com/SvenWerlen/moulinette-browser-extension/releases)
 [![License](https://img.shields.io/github/license/SvenWerlen/moulinette-browser-extension)](https://github.com/SvenWerlen/moulinette-browser-extension/blob/main/LICENSE.txt)
-[![GitHub Download](https://img.shields.io/badge/foundryvtt-Download-important)](#install)
 [![Support me on Patreon](https://img.shields.io/badge/patreon-Support%20me-informational)](https://www.patreon.com/moulinette)
 
 This module is part of the [Moulinette suite](https://www.moulinette.cloud) of tools designed to simplify the search and use of content for game masters, helping them prepare their game sessions and even manage their games in real time.
