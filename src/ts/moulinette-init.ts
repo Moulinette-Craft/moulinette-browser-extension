@@ -8,7 +8,7 @@ $.ajax({
   const existingPanel = document.getElementById("moulinette-panel");
   if (!existingPanel) {
     const panel = document.createElement('div');
-    //panel.style.display = "none"
+    panel.style.display = "none"
     panel.id = "moulinette-panel"
     document.body.appendChild(panel);
     $(panel).html(data);  

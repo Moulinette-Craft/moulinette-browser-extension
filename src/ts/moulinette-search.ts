@@ -178,7 +178,6 @@ class MouCollectionCloudAsset {
           }
         }
         break
-      case MouCollectionAssetTypeEnum.Scene:  
       case MouCollectionAssetTypeEnum.Map:  
         this.meta.push({ 
           id: "size", 
