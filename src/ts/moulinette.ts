@@ -240,9 +240,11 @@ $(async function() {
               break;
             case MouCollectionAssetTypeEnum.PDF:
             case MouCollectionAssetTypeEnum.Image:
+              resultsHTML += `<div class="mtteAsset" title="${r.name}" data-id="${r.id}" draggable="true" style="background-image: url('${r.previewUrl ? r.previewUrl.replace(/'/g, "\\'") : ""}')"></div>`
+              break;
             case MouCollectionAssetTypeEnum.Map:
             case MouCollectionAssetTypeEnum.Scene:
-              resultsHTML += `<div class="mtteAsset" title="${r.name}" data-id="${r.id}" draggable="true" style="background-image: url('${r.previewUrl ? r.previewUrl.replace(/'/g, "\\'") : ""}')"></div>`
+              resultsHTML += `<div class="mtteAsset map" title="${r.name}" data-id="${r.id}" draggable="true" style="background-image: url('${r.previewUrl ? r.previewUrl.replace(/'/g, "\\'") : ""}'); background-color: ${r.background_color ? '#' + r.background_color : 'none'}"></div>`
           }
           
         })

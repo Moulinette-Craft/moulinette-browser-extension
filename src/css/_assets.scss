@@ -2,6 +2,7 @@
 
 #mtteAssets {
   --mou-asset-size: 100px;
+  --mou-asset-size-map: 200px;
 
   position: relative;
   display: flex;
@@ -24,6 +25,7 @@
     background-position: center;
     background-size: var(--mou-asset-size);
     background-repeat: no-repeat;
+    border-radius: 5px;
     margin: 2px;
 
     &.sound {
@@ -38,8 +40,14 @@
       .meta { padding-right: 5px; }
   
       &:hover {
-        background-color: #333;
+        background-color: #bbb;
       }
+    }
+
+    &.map {
+      width: var(--mou-asset-size-map);
+      height: var(--mou-asset-size-map);
+      background-size: var(--mou-asset-size-map);
     }
   }
   
