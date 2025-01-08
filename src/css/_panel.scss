@@ -1,5 +1,6 @@
 #moulinette-panel {
   all: revert;
+  color: #333;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 14px;
   position: fixed;
@@ -46,7 +47,6 @@
   }
 
   h1 {
-    color: #666;
     font-size: 20px;
     font-family: Sans-serif;
     margin-left: 36px;
@@ -101,16 +101,6 @@
     display: none;
   }
 
-  .mtteInstructions {
-    font-size: 12px;
-    position: relative;
-    margin: 10px;
-    padding: 5px 15px;
-    width: 300px;
-    background-color: white;
-    border: 1px solid #444;
-  }
-
   .mtteFooter {
     display: flex;
     height: 20px;
@@ -121,18 +111,42 @@
     }
   }
   
-  .mtteWarning {
+  .mtteInfo {
+    text-align: center;
     width: 100%;
-    color: darkred;
     padding: 3px 0px;
     border-top: 1px dotted #555;
     border-bottom: 1px dotted #555;
+
+    .instructions {
+      text-align: left;
+      
+      h4 { font-size: 16px; font-weight: bold; margin-top: 15px; }
+    }
+  }
+
+  .mtteAuth {
+    font-size: smaller;
+    width: 100%;
+    padding: 5px;
+    border-radius: 6px;
+    background-color: #d0f3db;
+    color: #0b7e2e;
+    border: 1px solid #0b7e2e;
+    margin-bottom: 5px;
+
+    &.warn {
+      background-color: #f0cece;
+      color: #941d1d;
+      border: 2px solid #941d1d;
+    }
   }
 }
 
 
 @media (prefers-color-scheme: dark) {
   #moulinette-panel {
+    color: #eee;
     background-color: #333;
     border: 2px solid #888;
   } 

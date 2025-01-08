@@ -29,7 +29,7 @@
   },
 
   "background": {
-    "scripts": ["moulinette.js"]
+    "scripts": ["js/background.js"]
   },
 
   "options_ui": {
@@ -54,13 +54,9 @@
       ],
       "js": [
         "js/jquery-3.7.1.min.js",
-        "js/moulinette-search.js",
-        "js/moulinette-util.js",
-        "js/moulinette-patreon.js",
-        "js/moulinette-init.js",
         "js/moulinette.js"
       ],
-      "css": [ "css/moulinette.css" ]
+      "css": [ "css/style.css" ]
     }
   ],
 

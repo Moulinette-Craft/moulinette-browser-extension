@@ -48,8 +48,7 @@ $(async function() {
       }
 
       timerIter++;
-      const sessionId = await patreon.getSessionId()
-      msgBox.html(msgBox.text() + "." + sessionId + "<br/>")
+      msgBox.html(msgBox.text() + ".")
 
       if(await patreon.isReady()) {
         clearInterval(timer);

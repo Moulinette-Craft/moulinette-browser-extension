@@ -8,7 +8,6 @@ async function toggleMoulinettePanel() {
     // retrieve currently active tab
     const tabs = await browser.tabs.query({ currentWindow: true, active: true, lastFocusedWindow: true })
     if(tabs && tabs.length == 1) {
-      console.log("SENDING MESSAGE", tabs)
       browser.tabs.sendMessage(tabs[0].id, {action: "togglePanel"});
     }
   }
@@ -22,10 +21,8 @@ async function toggleMoulinettePanel() {
 
 // default (firefox and others)
 if(typeof browser !== "undefined") {
-  console.log("HERE")
   browser.browserAction.onClicked.addListener(toggleMoulinettePanel);
   browser.commands.onCommand.addListener((command: string) => {
-    console.log("COMMAND")
     if (command === "toggle-panel") {
       toggleMoulinettePanel()
     }
@@ -46,3 +43,14 @@ else {
     });
   });
 }
+
+/** Open Options page */
+(typeof browser !== "undefined" ? browser : chrome).runtime.onMessage.addListener(function(message: any) {
+  switch (message.action) {
+      case "openOptionsPage":
+        (typeof browser !== "undefined" ? browser : chrome).runtime.openOptionsPage();
+          break;
+      default:
+          break;
+  }
+});

@@ -193,23 +193,43 @@ $(async function() {
       const creator = $("#mtteCreators").val() as string
       const pack = $("#mttePacks").val() as string
 
+      // stop any preview
+      clearTimeout(previewTimeout)
+      previewSound.pause()
+      previewSound.src = ""
+
       const client = await MoulinetteSearch.getUniqueInstance()
       if(page >= 0) {
         const results = await client.searchAssets({terms, type, creator, pack}, page, allAssets)
         
-        // exception handling
         if(!results) {
           return;
         }
         // update current page according to results        
         moulinetteState.curPage = results.length == 0 || results.length < MoulinetteSearch.MAX_ASSETS ? -1 : page
 
-        if(results.length == 0 && page == 0) {    
-          $("#mtteAssets").html(`<div class="mtteWarning">No result. ${allAssets ? "" : "Check \"all\" to see assets from all creators."}</div>`)
-          return
+        let resultsHTML = ""
+
+        // update auth user
+        if(page == 0) {
+          const user : any = await client.getAuthUser()
+          if(user && user.fullName) {
+            if(user.patron) {
+              resultsHTML += `<div class="mtteAuth">Logged in as "${user.fullName}" and supporting Moulinette ♥.</a></div>`
+            }
+            else {
+              resultsHTML += `<div class="mtteAuth warn">Logged in as "${user.fullName}". <a href="https://www.patreon.com/moulinette" target="_blank">Supporting Moulinette</a> is required to access content from <a href="https://assets.moulinette.cloud/marketplace/creators" target="_blank">available creators</a>.</div>`
+            }  
+          } else {
+            resultsHTML += `<div class="mtteAuth warn">Not authenticated. <a href="" class="mtte-configure">Configure MBE</a> to connect your Patreon account.</div>`
+          }  
         }
 
-        let resultsHTML = ""
+        if(results.length == 0 && page == 0) {    
+          resultsHTML += `<div class="mtteInfo">No result. ${allAssets ? "" : "Check \"all\" to see assets from all creators."}</div>`
+          $("#mtteAssets").html(resultsHTML)
+        }
+
         results.forEach((r) => {
           switch(r.type) {
             case MouCollectionAssetTypeEnum.Audio: 
@@ -218,8 +238,10 @@ $(async function() {
               resultsHTML += `<div class="mtteAsset sound" data-id="${r.id}" data-preview="${r.previewUrl ? r.previewUrl : ''}" draggable="true">` +
                 `<div class="title">🎵 ${r.name} ${hasPreview}</div><div class="meta">${duration}</div></div>`
               break;
+            case MouCollectionAssetTypeEnum.PDF:
             case MouCollectionAssetTypeEnum.Image:
             case MouCollectionAssetTypeEnum.Map:
+            case MouCollectionAssetTypeEnum.Scene:
               resultsHTML += `<div class="mtteAsset" title="${r.name}" data-id="${r.id}" draggable="true" style="background-image: url('${r.previewUrl ? r.previewUrl.replace(/'/g, "\\'") : ""}')"></div>`
           }
           
@@ -305,6 +327,11 @@ $(async function() {
           clearTimeout(previewTimeout)
           previewSound.pause()
           previewSound.src = ""
+        })
+
+        $('a.mtte-configure').on("click", function(ev) {
+          ev.preventDefault();
+          (typeof browser !== "undefined" ? browser : chrome).runtime.sendMessage({"action": "openOptionsPage"});
         })
 
         // update counts

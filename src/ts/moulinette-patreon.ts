@@ -4,7 +4,7 @@ declare var browser: any;
 export class MoulinettePatreon {
 
   //static SERVER_URL = "https://127.0.0.1:5000"
-  static SERVER_URL = "http://assets.moulinette.cloud"
+  static SERVER_URL = "https://assets.moulinette.cloud"
 
   // client ID for FVTT integration
   static CLIENT_ID = "K3ofcL8XyaObRrO_5VPuzXEPnOVCIW3fbLIt6Vygt_YIM6IKxA404ZQ0pZbZ0VkB"
@@ -14,9 +14,12 @@ export class MoulinettePatreon {
   /**
    * Returns the current user session ID
    */
-  async getSessionId() {
-    const data = await (typeof browser !== "undefined" ? browser : chrome).storage.local.get("sessionId")
-    return data && data.sessionId ? data.sessionId : null
+  async getSessionId(force = false) {
+    if(!force || await this.getPatronUser()) {
+      const data = await (typeof browser !== "undefined" ? browser : chrome).storage.local.get("sessionId")
+      return data && data.sessionId ? data.sessionId : null
+    }
+    return null
   }
 
   /**
@@ -40,31 +43,41 @@ export class MoulinettePatreon {
     //await chrome.storage.local.remove("patronUser")
     //await chrome.storage.local.set({ sessionId: "cv5bl1p0bzpwh0dk2hm7vor3vy" })
 
-    const user = await (typeof browser !== "undefined" ? browser : chrome).storage.local.get("patronUser")
-    const data = await (typeof browser !== "undefined" ? browser : chrome).storage.local.get("sessionId")
-
-    if(user && user.patronUser) {
-      return user.patronUser;
+    const storage = await (typeof browser !== "undefined" ? browser : chrome).storage.local.get(["patronUser", "patreonUpdate", "sessionId"])
+    
+    if(storage && storage.patronUser && storage.patreonUpdate && storage.patreonUpdate > (new Date().getTime() - 3600000)) {
+      console.log("MoulinetteSearch | Using cached user data")
+      return storage.patronUser;
     }
 
-    if(!data) return null;
+    if(!storage || !storage.sessionId) return null;
 
     const noCache = "?ms=" + new Date().getTime()
-    const results = await fetch(`${MoulinettePatreon.SERVER_URL}/user/${data.sessionId}${noCache}`).catch(function(e) {
-      console.log(`MoulinetteSearch | Something went wrong while fetching user data from the server`)
+    const results = await fetch(`${MoulinettePatreon.SERVER_URL}/user/${storage.sessionId}${noCache}`).catch(function(e) {
+      console.log(`MoulinettePatreon | Something went wrong while fetching user data from the server`)
       console.warn(e)
       return null;
     })
 
     if(results && results.status == 200) {
       const user = await results.json()
-      await (typeof browser !== "undefined" ? browser : chrome).storage.local.set({ patronUser : user })
-      // GUID has been updated (after 24 hours, for security reasons)
-      if(user.guid) {
-        await (typeof browser !== "undefined" ? browser : chrome).storage.local.set({ sessionId : user.guid })
-        delete user.guid
+      // user is only valid if user data contains a full name
+      if(user.fullName) {
+        let storageNew : any = { patronUser : user, patreonUpdate : new Date().getTime() }
+        // check if GUID has been updated
+        if(user.guid) {
+          storageNew["sessionId"] = user.guid
+          delete user.guid
+        }
+        console.log("MoulinettePatreon | Storing user data.")
+        await (typeof browser !== "undefined" ? browser : chrome).storage.local.set(storageNew)
+        
+        return user  
+      } 
+      // user is not valid => clear storage from deprecated data
+      else {
+        await (typeof browser !== "undefined" ? browser : chrome).storage.local.clear()
       }
-      return user
     }
 
     return null;
@@ -79,7 +92,7 @@ export class MoulinettePatreon {
       return false;
     }
     const results = await fetch(`${MoulinettePatreon.SERVER_URL}/user/${sessionId}/ready`).catch(function(e) {
-      console.log(`MoulinetteSearch | Something went wrong while checking session readiness`)
+      console.log(`MoulinettePatreon | Something went wrong while checking session readiness`)
       console.warn(e)
       return null;
     })

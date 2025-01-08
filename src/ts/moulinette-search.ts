@@ -2,6 +2,9 @@ import { MoulinetteClient } from "./moulinette-client.js"
 import {MoulinettePatreon} from "./moulinette-patreon.js"
 import MouMediaUtils from "./utils/media-utils.js"
 
+declare var chrome: any;
+declare var browser: any;
+
 export class CloudConstants {
   static MOU_STORAGE     = "https://mttestorage.blob.core.windows.net/"
   static MOU_STORAGE_PUB = "https://moulinette-previews.nyc3.cdn.digitaloceanspaces.com/"
@@ -175,6 +178,7 @@ class MouCollectionCloudAsset {
           }
         }
         break
+      case MouCollectionAssetTypeEnum.Scene:  
       case MouCollectionAssetTypeEnum.Map:  
         this.meta.push({ 
           id: "size", 
@@ -235,11 +239,19 @@ export class MoulinetteSearch {
     if(!MoulinetteSearch.INSTANCE) {
       // retrieve user from server
       const patreon = new MoulinettePatreon()
-      const sessionId = await patreon.getSessionId()
+      const sessionId = await patreon.getSessionId(true)
       // create new instance
       MoulinetteSearch.INSTANCE = new MoulinetteSearch(sessionId)
     }
     return MoulinetteSearch.INSTANCE
+  }
+
+  /**
+   * Returns the current user
+   */
+  async getAuthUser() {
+    const patreon = new MoulinettePatreon()
+    return await patreon.getPatronUser()
   }
 
 
@@ -252,7 +264,7 @@ export class MoulinetteSearch {
    */
   getAssetTypeId(assetType : string) : MouCollectionAssetTypeEnum {
     switch(assetType) {
-      case "map": return MouCollectionAssetTypeEnum.Map;
+      case "map": return MouCollectionAssetTypeEnum.Scene;
       case "sound": return MouCollectionAssetTypeEnum.Audio; 
       case "pdf": return MouCollectionAssetTypeEnum.PDF;
       default: return MouCollectionAssetTypeEnum.Image
@@ -275,6 +287,7 @@ export class MoulinetteSearch {
       console.warn("MoulinetteSearch | Moulinette already searching ... please wait!")
       return null
     }
+
     this.pending = true
     let searchFilters : MouCollectionFilters = {
       searchTerms: filters.terms,
