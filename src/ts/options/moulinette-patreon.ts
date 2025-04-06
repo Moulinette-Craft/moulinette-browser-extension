@@ -6,7 +6,7 @@ declare var browser: any;
 
 export class MoulinettePatreon {
 
-  //static SERVER_URL = "https://127.0.0.1:5000"
+  //static SERVER_URL = "http://127.0.0.1:5000"
   static SERVER_URL = "https://assets.moulinette.cloud"
 
   // client ID for FVTT integration

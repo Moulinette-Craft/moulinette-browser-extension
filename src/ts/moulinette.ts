@@ -80,7 +80,6 @@ $(async function() {
       if(id) {
         
         const asset = await client.getAssetDetails(id)
-        console.log(asset)
         if(asset) {
           $("#moulinette-preview .mtteImgPreview").css("width", url ? "300" : "100");
           $("#moulinette-preview .mtteImgPreview").css("height", url ? "300" : "100");
@@ -263,12 +262,12 @@ $(async function() {
         // listener : dragging the image
         $(".mtteAsset").off()
         $(".mtteAsset").on('dragstart', function(ev) {
-          changeDropZoneVisibility(true)
           const asset = $(ev.currentTarget)
           ev.originalEvent?.dataTransfer?.setData("Moulinette", JSON.stringify({
             id: asset.data("id"),
             name: asset?.attr("title")?.split("/").pop()
           }));
+          changeDropZoneVisibility(true)
         });
 
         // listener : click => preview
@@ -465,7 +464,6 @@ $(async function() {
       let data = e.originalEvent?.dataTransfer?.getData("Moulinette");
       if(data) {
         let jsonData = JSON.parse(data) as any
-        console.log(jsonData)
         // download the image from server
         const filename = jsonData.name
         const file = await client.downloadAssetByIdName(jsonData.id, filename)
