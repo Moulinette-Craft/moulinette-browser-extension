@@ -3,7 +3,7 @@
   "manifest_version": 2,
   "name": "Moulinette TTRPG Media Search",
   "version": "2.0.0",
-  "description": "Web-browser client for the Moulinette Cloud service. Search and Browse assets from the creators you support on Patreon.",
+  "description": "Search engine for TTRPG content (maps, tiles, tokens, music, sounds). Download and use the assets directly on VTT platforms.",
 
   "icons": {
     "48": "icons/moulinette-48.png",
@@ -14,10 +14,12 @@
     "activeTab",
     "scripting",
     "storage",
+    "http://127.0.0.1/*",
     "https://assets.moulinette.cloud/*",
     "https://assets-dev.moulinette.cloud/*",
     "https://mttecloudstorage.blob.core.windows.net/*",
-    "https://mttestorage.blob.core.windows.net/*"
+    "https://mttestorage.blob.core.windows.net/*",
+    "https://moulinette-previews.nyc3.cdn.digitaloceanspaces.com/*"
   ],
 
   "browser_action": {

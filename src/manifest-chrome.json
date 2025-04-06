@@ -2,8 +2,8 @@
 
   "manifest_version": 3,
   "name": "Moulinette TTRPG Media Search",
-  "version": "1.0.1",
-  "description": "Web-browser client for the Moulinette Cloud service. Search and Browse assets from the creators you support on Patreon.",
+  "version": "2.0.0",
+  "description": "Search engine for TTRPG content (maps, tiles, tokens, music, sounds). Download and use the assets directly on VTT platforms.",
 
   "icons": {
     "48": "icons/moulinette-48.png",
@@ -16,15 +16,15 @@
     "storage"
   ],
 
-  "background": {
-    "service_worker": "moulinette.js"
-  },
-
   "action": {
     "default_icon": {
       "16": "icons/moulinette-16.png",
       "32": "icons/moulinette-32.png"
     }
+  },
+
+  "background": {
+    "service_worker": "js/background.js"
   },
 
   "options_ui": {
@@ -48,15 +48,10 @@
       "http://*/*"
     ],
     "js": [
-      "js/jquery-3.6.1.min.js",
-      "js/elastic_app_search.umd.js",
-      "js/moulinette-search.js",
-      "js/moulinette-util.js",
-      "js/moulinette-patreon.js",
-      "js/moulinette-init.js",
+      "js/jquery-3.7.1.min.js",
       "js/moulinette.js"
     ],
-    "css": [ "css/moulinette.css" ]
+    "css": [ "css/style.css" ]
   }],
 
   "web_accessible_resources": [{
