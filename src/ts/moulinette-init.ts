@@ -1,10 +1,12 @@
 declare var chrome: any;
 declare var browser: any;
 
+console.log("Moulinette: Initializing Moulinette...");
 $.ajax({
     url: (typeof browser !== "undefined" ? browser : chrome).runtime.getURL("html/moulinette-panel.html"),
     cache: false
 }).done(function(data) {
+  console.log("Moulinette: Panel HTML loaded");
   const existingPanel = document.getElementById("moulinette-panel");
   if (!existingPanel) {
     const panel = document.createElement('div');

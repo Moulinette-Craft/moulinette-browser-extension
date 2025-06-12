@@ -2,7 +2,7 @@
 
   "manifest_version": 2,
   "name": "Moulinette TTRPG Media Search",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Search engine for TTRPG content (maps, tiles, tokens, music, sounds). Download and use the assets directly on VTT platforms.",
 
   "icons": {

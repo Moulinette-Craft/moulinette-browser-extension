@@ -1,6 +1,6 @@
 {
   "name": "moulinette-extension",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "The Moulinette extension allows you to search for content for your TTRPG (tabletop role-playing games) sessions, such as maps, tokens, or simply images.",
   "main": "index.js",
   "private": true,
